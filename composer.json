@@ -1,0 +1,12 @@
+{
+    "name": "mnobrega/jira_tool",
+    "authors": [
+        {
+            "name": "Marcio Nobrega",
+            "email": "marcio.nobrega@sapo.pt"
+        }
+    ],
+    "require": {
+        "chobie/jira-api-restclient": "^1.0"
+    }
+}
