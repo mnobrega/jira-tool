@@ -35,7 +35,23 @@ class JIRAService
         $this->walker->push('status IN ('.$statusString.') ORDER BY priority DESC');
         foreach ($this->walker as $issue)
         {
+            /**@var $issue Jira_Issue*/
+            /**@var $issueTest Jira_Issue*/
             $issues[] = new JIRAIssue($issue);
+        }
+
+        $issueTest = $this->api->getIssue($issue->getKey(),"changelog");
+        /**@var $issueTest Jira_Api_Result*/
+        echo "<pre>";
+        $expandedInformation = $issueTest->getResult();
+        $changeLog = $expandedInformation['changelog'];
+        foreach($changeLog['histories'] as $history)
+        {
+            //var_dump($history);die();
+            if ($history['items'][0]['field']=='status')
+            {
+                echo $history['created']." - ".$history['items'][0]['fromString']." - ".$history['items'][0]['toString']."<br>";
+            }
         }
 
         return $issues;
