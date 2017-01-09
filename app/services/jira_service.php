@@ -59,19 +59,23 @@ class JIRAIssue
 
     public function __construct(Jira_Issue $issue)
     {
+        $fields = $issue->getFields();
+        $priority = $issue->getPriority();
+        $status = $issue->getStatus();
+
         $this->key = $issue->getKey();
         $this->summary = $issue->getSummary();
-        $this->priority = $issue->getPriority()['id'];
-        $this->type = $issue->getFields()['Issue Type']['name'];
-        $this->project = $issue->getFields()['Project']['name'];
-        $this->originalEstimate = $issue->getFields()['Original Estimate'];
-        $this->remainingEstimate = $issue->getFields()['Remaining Estimate'];
-        $this->releaseDate = count($issue->getFields()['Fix Version/s'])==1?
-            $issue->getFields()['Fix Version/s'][0]['releaseDate']:null;
-        $this->labels = implode(',',$issue->getFields()['Labels']);
-        $this->assignee = $issue->getFields()['Assignee']['displayName'];
-        $this->releaseSummary = $issue->getFields()['Release Summary'];
-        $this->status = $issue->getStatus()['name'];
+        $this->priority = $priority['id'];
+        $this->type = $fields['Issue Type']['name'];
+        $this->project = $fields['Project']['name'];
+        $this->originalEstimate = $fields['Original Estimate'];
+        $this->remainingEstimate = $fields['Remaining Estimate'];
+        $this->releaseDate = count($fields['Fix Version/s'])==1?
+            $fields['Fix Version/s'][0]['releaseDate']:null;
+        $this->labels = implode(',',$fields['Labels']);
+        $this->assignee = $fields['Assignee']['displayName'];
+        $this->releaseSummary = $fields['Release Summary'];
+        $this->status = $status['name'];
     }
 
     public function getKey() { return $this->key;}
