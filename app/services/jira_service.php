@@ -1,6 +1,7 @@
 <?php
 
 require ROOT_DIR.'vendor/autoload.php';
+require ROOT_DIR.'app/services/time_service.php';
 
 class JIRAService
 {
@@ -9,9 +10,13 @@ class JIRAService
     const STATUS_TO_DEVELOP = 'To Develop';
     const STATUS_TO_QUALITY = 'To Quality';
     const STATUS_ANALYSED = 'Analysed';
+    const STATUS_DEV_DONE = 'Dev Done';
+    const STATUS_READY_TO_DEPLOY = 'Ready to Deploy';
+    const STATUS_QA_DONE = 'QA Done';
 
     private $api;
     private $walker;
+    private $timeService;
 
     function __construct()
     {
@@ -21,6 +26,8 @@ class JIRAService
         );
 
         $this->walker = new Jira_Issues_Walker($this->api);
+
+        $this->timeService = new TimeService();
     }
 
     /**
@@ -32,30 +39,66 @@ class JIRAService
         $issues = array();
         $statusString = '"'.implode('","',$status).'"';
 
-        $this->walker->push('status IN ('.$statusString.') ORDER BY priority DESC');
+        $this->walker->push('status IN ('.$statusString.')  AND resolution=Unresolved ORDER BY priority DESC');
         foreach ($this->walker as $issue)
         {
             /**@var $issue Jira_Issue*/
-            /**@var $issueTest Jira_Issue*/
             $issues[] = new JIRAIssue($issue);
-        }
-
-        $issueTest = $this->api->getIssue($issue->getKey(),"changelog");
-        /**@var $issueTest Jira_Api_Result*/
-        echo "<pre>";
-        $expandedInformation = $issueTest->getResult();
-        $changeLog = $expandedInformation['changelog'];
-        foreach($changeLog['histories'] as $history)
-        {
-            //var_dump($history);die();
-            if ($history['items'][0]['field']=='status')
-            {
-                echo $history['created']." - ".$history['items'][0]['fromString']." - ".$history['items'][0]['toString']."<br>";
-            }
         }
 
         return $issues;
     }
+
+    public function getIssuesTimeSpent(Array $issues)
+    {
+        $issuesTimeSpent = array();
+        foreach ($issues as $issue)
+        {
+            /**@var $issue JIRAIssue*/
+            $issueTimeSpent = 0;
+            if ($issue->getOriginalEstimate()!=null)
+            {
+                $JiraApiResult = $this->api->getIssue($issue->getKey(),"changelog");
+                /**@var $JiraApiResult Jira_Api_Result*/
+                $expandedInformation = $JiraApiResult->getResult();
+                $changelog = $expandedInformation['changelog'];
+                $timeIntervals = array();
+                $timeInterval = null;
+                foreach ($changelog['histories'] as $history)
+                {
+                    foreach($history['items'] as $historyItem)
+                    {
+                        if ($historyItem['field']=='status')
+                        {
+                            if ($historyItem['fromString']==self::STATUS_TO_DEVELOP)
+                            {
+                                if (!is_null($timeInterval))
+                                {
+                                    $timeIntervals[] = $timeInterval;
+                                }
+                                $timeInterval = array('start'=>$history['created'],'end'=>null);
+                            }
+                            if ($historyItem['toString']==self::STATUS_DEV_DONE || $historyItem['toString']==self::STATUS_TO_DEVELOP)
+                            {
+                                if (is_array($timeInterval))
+                                {
+                                    $timeInterval['end'] = $history['created'];
+                                    $timeIntervals[] = $timeInterval;
+                                    $timeInterval = null;
+                                }
+                            }
+                        }
+                    }
+                }
+                $issueTimeSpent = $this->timeService->getWorkingHours($timeIntervals);
+            }
+
+            $issuesTimeSpent[$issue->getKey()] = $issueTimeSpent;
+        }
+
+        return $issuesTimeSpent;
+    }
+
 }
 
 class JIRAIssue
