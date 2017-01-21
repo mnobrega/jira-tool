@@ -1,7 +1,9 @@
 <?php
 
 require ROOT_DIR.'vendor/autoload.php';
+require ROOT_DIR.'app/common/converters.php';
 require ROOT_DIR.'app/services/time_service.php';
+require ROOT_DIR.'app/services/daos/dao_jira_issues.php';
 
 class JIRAService
 {
@@ -13,21 +15,21 @@ class JIRAService
     const STATUS_DEV_DONE = 'Dev Done';
     const STATUS_READY_TO_DEPLOY = 'Ready to Deploy';
     const STATUS_QA_DONE = 'QA Done';
+    const STATUS_RAW_REQUEST = 'Raw Request';
 
     private $api;
     private $walker;
     private $timeService;
 
+    private $daoJIRAIssues;
+
     function __construct()
     {
-        $this->api = new \Jira_Api(
-            'http://market.kujira.premium-minds.com',
-            new \Jira_Api_Authentication_Basic('mnobrega','Madeira.24404')
-        );
-
+        $this->api = new \Jira_Api(JIRA_URL, new \Jira_Api_Authentication_Basic(JIRA_USERNAME, JIRA_PASSWORD));
         $this->walker = new Jira_Issues_Walker($this->api);
-
         $this->timeService = new TimeService();
+
+        $this->daoJIRAIssues = new DAOJIRAIssues();
     }
 
     /**
@@ -37,51 +39,53 @@ class JIRAService
     public function getIssuesByStatuses(Array $status)
     {
         $issues = array();
-        $statusString = '"'.implode('","',$status).'"';
+        $statusString = '"' . implode('","', $status) . '"';
 
-        $this->walker->push('status IN ('.$statusString.')  AND resolution=Unresolved ORDER BY priority DESC');
-        foreach ($this->walker as $issue)
-        {
-            /**@var $issue Jira_Issue*/
+        $this->walker->push('status IN (' . $statusString . ')  AND resolution=Unresolved ORDER BY priority DESC');
+        foreach ($this->walker as $issue) {
+            /**@var $issue Jira_Issue */
             $issues[] = new JIRAIssue($issue);
         }
 
         return $issues;
     }
 
+    /**
+     * @param $issues JIRAIssue []
+     */
+    public function persistIssues(Array $issues)
+    {
+        $this->daoJIRAIssues->deleteAllJIRAIssues();
+        foreach ($issues as $issue)
+        {
+            $this->daoJIRAIssues->insertJIRAIssue(new JIRAIssueTblTuple($issue->toArray()));
+        }
+    }
+
     public function getIssuesTimeSpent(Array $issues)
     {
         $issuesTimeSpent = array();
-        foreach ($issues as $issue)
-        {
-            /**@var $issue JIRAIssue*/
+        foreach ($issues as $issue) {
+            /**@var $issue JIRAIssue */
             $issueTimeSpent = 0;
-            if ($issue->getOriginalEstimate()!=null)
-            {
-                $JiraApiResult = $this->api->getIssue($issue->getKey(),"changelog");
-                /**@var $JiraApiResult Jira_Api_Result*/
+            if ($issue->getOriginalEstimate() != null) {
+                $JiraApiResult = $this->api->getIssue($issue->getIssueKey(), "changelog");
+                /**@var $JiraApiResult Jira_Api_Result */
                 $expandedInformation = $JiraApiResult->getResult();
                 $changelog = $expandedInformation['changelog'];
                 $timeIntervals = array();
                 $timeInterval = null;
-                foreach ($changelog['histories'] as $history)
-                {
-                    foreach($history['items'] as $historyItem)
-                    {
-                        if ($historyItem['field']=='status')
-                        {
-                            if ($historyItem['fromString']==self::STATUS_TO_DEVELOP)
-                            {
-                                if (!is_null($timeInterval))
-                                {
+                foreach ($changelog['histories'] as $history) {
+                    foreach ($history['items'] as $historyItem) {
+                        if ($historyItem['field'] == 'status') {
+                            if ($historyItem['fromString'] == self::STATUS_TO_DEVELOP && $historyItem['toString'] != self::STATUS_RAW_REQUEST) {
+                                if (!is_null($timeInterval)) {
                                     $timeIntervals[] = $timeInterval;
                                 }
-                                $timeInterval = array('start'=>$history['created'],'end'=>null);
+                                $timeInterval = array('start' => $history['created'], 'end' => null);
                             }
-                            if ($historyItem['toString']==self::STATUS_DEV_DONE || $historyItem['toString']==self::STATUS_TO_DEVELOP)
-                            {
-                                if (is_array($timeInterval))
-                                {
+                            if ($historyItem['toString'] == self::STATUS_DEV_DONE || $historyItem['toString'] == self::STATUS_TO_DEVELOP) {
+                                if (is_array($timeInterval)) {
                                     $timeInterval['end'] = $history['created'];
                                     $timeIntervals[] = $timeInterval;
                                     $timeInterval = null;
@@ -93,20 +97,18 @@ class JIRAService
                 $issueTimeSpent = $this->timeService->getWorkingHours($timeIntervals);
             }
 
-            $issuesTimeSpent[$issue->getKey()] = $issueTimeSpent;
+            $issuesTimeSpent[$issue->getIssueKey()] = $issueTimeSpent;
         }
 
         return $issuesTimeSpent;
     }
-
 }
 
 class JIRAIssue
 {
-    private $key;
+    private $issueKey;
     private $summary;
-    private $priority;
-    private $type;
+    private $issueType;
     private $project;
     private $originalEstimate;
     private $remainingEstimate;
@@ -114,7 +116,7 @@ class JIRAIssue
     private $labels;
     private $assignee;
     private $releaseSummary;
-    private $status;
+    private $issueStatus;
 
     public function __construct(Jira_Issue $issue)
     {
@@ -122,25 +124,25 @@ class JIRAIssue
         $priority = $issue->getPriority();
         $status = $issue->getStatus();
 
-        $this->key = $issue->getKey();
+        $this->issueKey = $issue->getKey();
         $this->summary = $issue->getSummary();
         $this->priority = $priority['id'];
-        $this->type = $fields['Issue Type']['name'];
+        $this->issueType = $fields['Issue Type']['name'];
         $this->project = $fields['Project']['name'];
         $this->originalEstimate = $fields['Original Estimate'];
         $this->remainingEstimate = $fields['Remaining Estimate'];
-        $this->releaseDate = count($fields['Fix Version/s'])==1?
+        $this->releaseDate = (count($fields['Fix Version/s'])==1 && array_key_exists('releaseDate',$fields['Fix Version/s'][0]))?
             $fields['Fix Version/s'][0]['releaseDate']:null;
         $this->labels = implode(',',$fields['Labels']);
         $this->assignee = $fields['Assignee']['displayName'];
         $this->releaseSummary = $fields['Release Summary'];
-        $this->status = $status['name'];
+        $this->issueStatus = $status['name'];
     }
 
-    public function getKey() { return $this->key;}
+    public function getIssueKey() { return $this->issueKey;}
     public function getSummary() { return $this->summary;}
     public function getPriority() { return $this->priority;}
-    public function getType() { return $this->type;}
+    public function getIssueType() { return $this->issueType;}
     public function getProject() { return $this->project;}
     public function getOriginalEstimate() { return $this->originalEstimate;}
     public function getRemainingEstimate() { return $this->remainingEstimate;}
@@ -148,5 +150,11 @@ class JIRAIssue
     public function getLabels() { return $this->labels;}
     public function getAssignee() { return $this->assignee;}
     public function getReleaseSummary(){ return $this->releaseSummary;}
-    public function getStatus() { return $this->status;}
+    public function getIssueStatus() { return $this->issueStatus;}
+
+    public function toArray()
+    {
+        $params = get_object_vars($this);
+        return convertCamelCaseKeys2camel_case($params);
+    }
 }

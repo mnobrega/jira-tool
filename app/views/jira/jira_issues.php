@@ -14,6 +14,20 @@
     $selectedStatusesPM = array(
         JIRAService::STATUS_ANALYSED
     );
+
+    $issues = array();
+    $issuesTimeSpent = array();
+
+    if (isset($_GET['sync']) && $_GET['sync']=='true'){
+        $issues = $JIRAService->getIssuesByStatuses($selectedStatusesTeam);
+        $issuesTimeSpent = $JIRAService->getIssuesTimeSpent($issues);
+        var_dump($issuesTimeSpent);
+        $JIRAService->persistIssues($issues);
+    }
+    else
+    {
+
+    }
 ?>
 <table id="tableIssuesProgressId" class="table table-striped table-bordered table-condensed">
     <thead>
@@ -24,29 +38,21 @@
             <th>Priority</th>
             <th>Assignee</th>
             <th>Summary</th>
-            <th>Orig. Estimate (days)</th>
-            <th>Rema. Estimate (days)</th>
-            <th>Cur. Time Spent (days)</th>
+            <th>Days (real/estimated)</th>
             <th>Progress (%)</th>
         </tr>
     </thead>
     <tbody>
-        <?php
-            $issues = $JIRAService->getIssuesByStatuses($selectedStatusesTeam);
-            $issuesTimeSpent = $JIRAService->getIssuesTimeSpent($issues);
-        ?>
         <?php foreach ($issues as $issue) {?>
         <tr>
-            <td><a href="http://market.kujira.premium-minds.com/browse/<?php echo $issue->getKey();?>" target="_blank"><?php echo $issue->getKey();?></a></td>
-            <td><?php echo $issue->getStatus();?></td>
+            <td><a href="http://market.kujira.premium-minds.com/browse/<?php echo $issue->getIssueKey();?>" target="_blank"><?php echo $issue->getIssueKey();?></a></td>
+            <td><?php echo $issue->getIssueStatus();?></td>
             <td><?php echo $issue->getReleaseDate();?></td>
             <td><?php echo $issue->getPriority();?></td>
             <td><?php echo $issue->getAssignee();?></td>
             <td><?php echo $issue->getSummary();?></td>
-            <td><?php echo round($issue->getOriginalEstimate()/3600/8,2);?></td>
-            <td><?php echo round($issue->getRemainingEstimate()/3600/8,2);?></td>
-            <td><?php echo round($issuesTimeSpent[$issue->getKey()]/8,2);?></td>
-            <td><?php echo (round($issue->getOriginalEstimate()/3600,2)!=0?round($issuesTimeSpent[$issue->getKey()]/round($issue->getOriginalEstimate()/3600,2),2)*100:0);?></td>
+            <td><?php echo round($issuesTimeSpent[$issue->getIssueKey()]/8,1);?> / <?php echo round($issue->getOriginalEstimate()/3600/8,1);?></td>
+            <td><?php echo (round($issue->getOriginalEstimate()/3600,2)!=0?round($issuesTimeSpent[$issue->getIssueKey()]/round($issue->getOriginalEstimate()/3600,2),2)*100:0);?></td>
         </tr>
         <?php } ?>
     </tbody>

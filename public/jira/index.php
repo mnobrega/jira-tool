@@ -3,6 +3,6 @@
     <?php require_once(DIR_VIEWS."common/header.php");?>
     <body>
         <?php require_once(DIR_VIEWS."common/menu.php");?>
-        <?php require_once(DIR_VIEWS . "jira/road_map.php");?>
+        <?php require_once(DIR_VIEWS . "jira/jira_issues.php");?>
     </body>
 </html>
