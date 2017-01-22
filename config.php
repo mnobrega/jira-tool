@@ -12,3 +12,5 @@ define('DB_NAME','jira_tools');
 define('JIRA_URL','http://market.kujira.premium-minds.com');
 define('JIRA_USERNAME','mnobrega');
 define('JIRA_PASSWORD','Madeira.24404');
+
+define('INSTANCE_TIMEZONE','Europe/Lisbon');

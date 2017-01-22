@@ -2,7 +2,7 @@
 
 use Phinx\Migration\AbstractMigration;
 
-class IssuesTable extends AbstractMigration
+class IssuesHistoryTable extends AbstractMigration
 {
     /**
      * Change Method.
@@ -27,20 +27,13 @@ class IssuesTable extends AbstractMigration
      */
     public function change()
     {
-        $jiraIssuesTbl = $this->table('jira_issues');
-        $jiraIssuesTbl->addColumn('issue_key','string',array('limit'=>10))
-            ->addColumn('issue_status','string',array('limit'=>20))
-            ->addColumn('summary','text')
-            ->addColumn('release_summary','text')
-            ->addColumn('priority','integer')
-            ->addColumn('issue_type','string')
-            ->addColumn('project','string')
-            ->addColumn('original_estimate','integer',array('null'=>true))
-            ->addColumn('remaining_estimate','integer',array('null'=>true))
-            ->addColumn('release_date','date',array('null'=>true))
-            ->addColumn('labels','text',array('null'=>true))
-            ->addColumn('assignee','string',array('null'=>true))
-            ->addIndex(array('issue_key'),array('unique'=>true))
+        $jiraIssuesHistoryTbl = $this->table('jira_issues_histories');
+        $jiraIssuesHistoryTbl->addColumn('issue_key','string')
+            ->addColumn('history_datetime','datetime')
+            ->addColumn('field','string',array('limit'=>50))
+            ->addColumn('from_string','string',array('limit'=>50))
+            ->addColumn('to_string','string',array('limit'=>50))
+            ->addIndex('issue_key')
             ->setOptions([
                 'encoding'  => 'utf8',
                 'collation' => 'utf8_general_ci',
@@ -48,5 +41,4 @@ class IssuesTable extends AbstractMigration
             ->addTimestamps()
             ->save();
     }
-
 }

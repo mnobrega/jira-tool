@@ -14,32 +14,34 @@
     $selectedStatusesPM = array(
         JIRAService::STATUS_ANALYSED
     );
+    $selectedIssuesHistoryTypes = array(
+        JIRAService::HISTORY_ITEM_TYPE_STATUS
+    );
 
     $issues = array();
     $issuesTimeSpent = array();
 
     if (isset($_GET['sync']) && $_GET['sync']=='true'){
         $issues = $JIRAService->getIssuesByStatuses($selectedStatusesTeam);
-        $issuesTimeSpent = $JIRAService->getIssuesTimeSpent($issues);
-        var_dump($issuesTimeSpent);
         $JIRAService->persistIssues($issues);
-    }
-    else
-    {
 
+        $issuesHistory = $JIRAService->getIssuesHistories($issues, $selectedIssuesHistoryTypes);
+        $JIRAService->persistIssuesHistories($issuesHistory);
     }
+    $issues = $JIRAService->getPersistedIssues();
+    $issuesTimeSpent = $JIRAService->getPersistedIssuesTimeSpent($issues);
 ?>
 <table id="tableIssuesProgressId" class="table table-striped table-bordered table-condensed">
     <thead>
         <tr>
-            <th>Key</th>
+            <th>Issue</th>
             <th>Status</th>
-            <th>Release Date</th>
+            <th>Deploy</th>
             <th>Priority</th>
             <th>Assignee</th>
             <th>Summary</th>
-            <th>Days (real/estimated)</th>
-            <th>Progress (%)</th>
+<!--            <th>Days (real/estimated)</th>-->
+<!--            <th>Progress (%)</th>-->
         </tr>
     </thead>
     <tbody>
@@ -51,8 +53,8 @@
             <td><?php echo $issue->getPriority();?></td>
             <td><?php echo $issue->getAssignee();?></td>
             <td><?php echo $issue->getSummary();?></td>
-            <td><?php echo round($issuesTimeSpent[$issue->getIssueKey()]/8,1);?> / <?php echo round($issue->getOriginalEstimate()/3600/8,1);?></td>
-            <td><?php echo (round($issue->getOriginalEstimate()/3600,2)!=0?round($issuesTimeSpent[$issue->getIssueKey()]/round($issue->getOriginalEstimate()/3600,2),2)*100:0);?></td>
+<!--            <td>--><?php //echo round($issuesTimeSpent[$issue->getIssueKey()]/8,1);?><!-- / --><?php //echo round($issue->getOriginalEstimate()/3600/8,1);?><!--</td>-->
+<!--            <td>--><?php //echo (round($issue->getOriginalEstimate()/3600,2)!=0?round($issuesTimeSpent[$issue->getIssueKey()]/round($issue->getOriginalEstimate()/3600,2),2)*100:0);?><!--</td>-->
         </tr>
         <?php } ?>
     </tbody>
@@ -63,7 +65,15 @@
         $('#tableIssuesProgressId').DataTable({
             "pageLength":20,
             dom: 'Bfrtip',
-            buttons: ['excel']
+            buttons: ['excel'],
+            columns: [
+                {"width":"9%"},
+                {"width":"8%"},
+                {"width":"8%"},
+                {"width":"5%"},
+                {"width":"10%"},
+                {"width":"60%"}
+            ]
         });
     } );
 </script>

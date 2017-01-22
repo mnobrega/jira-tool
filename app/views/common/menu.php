@@ -14,7 +14,7 @@
         <!-- Collect the nav links, forms, and other content for toggling -->
         <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
             <ul class="nav navbar-nav">
-                <li><a href="/jira/index.php">JIRA Issues</a></li>
+                <li><a href="/jira/index.php">Team Issues</a></li>
                 <li><a href="#">Gantt</a></li>
             </ul>
         </div><!-- /.navbar-collapse -->

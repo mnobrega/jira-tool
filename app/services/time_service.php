@@ -12,7 +12,7 @@ class TimeService
         $holiday = array('2015-10-12');
         $noofholiday = sizeof($holiday);
         $workhours = 0;
-
+        
         foreach ($timeIntervals as $timeInterval)
         {
             $initialDate = $timeInterval['start'];

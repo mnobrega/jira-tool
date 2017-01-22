@@ -11,10 +11,26 @@ require_once (ROOT_DIR.'app/common/pdo_singleton.php');
 class DAOJIRAIssues extends PDOSingleton
 {
     const TABLENAME_JIRA_ISSUES = 'jira_issues';
+    const TABLENAME_JIRA_ISSUES_HISTORIES = 'jira_issues_histories';
+
+    const HISTORY_ITEM_FIELD_STATUS = 'status';
+
+    const HISTORY_STATUS_DEV_IN_PROGRESS = 'Dev In Progress';
+    const HISTORY_STATUS_QA_IN_PROGRESS = 'QA In Progress';
+    const HISTORY_STATUS_ANALYSING = 'Analysing';
 
     public function __construct()
     {
         parent::__construct();
+    }
+
+    /**
+     * @return JIRAIssueTblTuple []
+     */
+    public function searchJIRAIssues()
+    {
+        $query = "SELECT * FROM ".self::TABLENAME_JIRA_ISSUES;
+        return $this->getObjArray($this->query($query),"JIRAIssueTblTuple");
     }
 
     public function insertJIRAIssue(JIRAIssueTblTuple $tuple)
@@ -38,9 +54,48 @@ class DAOJIRAIssues extends PDOSingleton
         $this->query($query);
     }
 
+    /**
+     * @param $issueKey
+     * @param array|null $fields
+     * @param array|null $fromStrings
+     * @param array|null $toStrings
+     * @return JIRAIssueHistoryTblTuple []
+     */
+    public function searchJIRAIssueHistories($issueKey, Array $fields=null, Array $fromStrings=null, Array $toStrings=null)
+    {
+        $query = "SELECT *
+                    FROM ".self::TABLENAME_JIRA_ISSUES_HISTORIES." jih
+                    WHERE jih.issue_key='".$issueKey."'
+                        ".(!is_null($fields)?" AND jih.field IN ".$this->inArray($fields):"")."
+                        ".(!is_null($fromStrings) && is_null($toStrings)?" AND jih.from_string IN ".$this->inArray($fromStrings):"")."
+                        ".(!is_null($toStrings) &&  is_null($fromStrings)?" AND jih.to_string IN ".$this->inArray($toStrings):"")."
+                        ".(!is_null($fromStrings) && !is_null($toStrings)?" AND (jih.from_string IN ".$this->inArray($fromStrings)." OR jih.to_string IN ".$this->inArray($toStrings).")":"")."
+                    ORDER BY jih.history_datetime ASC;";
+
+        return $this->getObjArray($this->query($query),"JIRAIssueHistoryTblTuple");
+    }
+
+    public function insertJIRAIssueHistory(JIRAIssueHistoryTblTuple $tuple)
+    {
+        $query = "INSERT INTO ".self::TABLENAME_JIRA_ISSUES_HISTORIES." (issue_key, history_datetime, field,
+            from_string, to_string) VALUES (
+                '".$tuple->getIssueKey()."',
+                '".$tuple->getHistoryDatetime()."',
+                '".$tuple->getField()."',
+                '".$tuple->getFromString()."',
+                '".$tuple->getToString()."')";
+        $this->query($query);
+    }
+
     public function deleteAllJIRAIssues()
     {
         $query = "DELETE FROM ".self::TABLENAME_JIRA_ISSUES;
+        $this->query($query);
+    }
+
+    public function deleteAllJIRAIssuesHistories()
+    {
+        $query = "DELETE FROM ".self::TABLENAME_JIRA_ISSUES_HISTORIES;
         $this->query($query);
     }
 }
@@ -88,4 +143,28 @@ class JIRAIssueTblTuple
     public function getReleaseDate() { return $this->releaseDate;}
     public function getLabels() { return $this->labels;}
     public function getAssignee() { return $this->assignee;}
+}
+
+class JIRAIssueHistoryTblTuple
+{
+    private $issueKey;
+    private $historyDatetime;
+    private $field;
+    private $fromString;
+    private $toString;
+
+    public function __construct($row)
+    {
+        $this->issueKey = $row['issue_key'];
+        $this->historyDatetime = $row['history_datetime'];
+        $this->field = $row['field'];
+        $this->fromString = $row['from_string'];
+        $this->toString = $row['to_string'];
+    }
+
+    public function getIssueKey() { return $this->issueKey;}
+    public function getHistoryDatetime() {return $this->historyDatetime;}
+    public function getField() { return $this->field;}
+    public function getFromString() {return $this->fromString;}
+    public function getToString() { return $this->toString;}
 }

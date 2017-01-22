@@ -31,12 +31,12 @@ class PDOSingleton
         return self::$_instance;
     }
 
-    public function query($query)
+    protected function query($query)
     {
         return $this->_db->query($query);
     }
 
-    public function getObj(PDOStatement $SQLResult,$className,$allowNull)
+    protected function getObj(PDOStatement $SQLResult,$className,$allowNull)
     {
         $obj = null;
         if ($SQLResult->rowCount()==1)
@@ -54,7 +54,7 @@ class PDOSingleton
         return $obj;
     }
 
-    public function getObjArray(PDOStatement $SQLResult, $className)
+    protected function getObjArray(PDOStatement $SQLResult, $className)
     {
         $result = array();
         while($row = $SQLResult->fetch(PDO::FETCH_ASSOC))
@@ -62,5 +62,10 @@ class PDOSingleton
             $result[] = new $className($row);
         }
         return $result;
+    }
+
+    protected function inArray(Array $arr)
+    {
+        return "('".(implode("','",$arr))."')";
     }
 }
