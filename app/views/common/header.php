@@ -10,6 +10,7 @@
     <link rel="stylesheet" type="text/css" href="/css/buttons.bootstrap.min.css">
 
     <script type="text/javascript" language="javascript" src="/js/jquery.min.js"></script>
+    <script type="text/javascript" language="javascript" src="/js/bootstrap.min.js"></script>
     <script type="text/javascript" language="javascript" src="/js/jquery.dataTables.min.js"></script>
     <script type="text/javascript" language="javascript" src="/js/dataTables.bootstrap.min.js"></script>
     <script type="text/javascript" language="javascript" src="/js/dataTables.buttons.min.js"></script>

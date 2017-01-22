@@ -7,17 +7,6 @@ require ROOT_DIR . 'app/services/daos/dao_jira_issues.php';
 
 class JIRAService
 {
-    const STATUS_DEV_IN_PROGRESS = 'Dev In Progress';
-    const STATUS_QA_IN_PROGRESS = 'QA In Progress';
-    const STATUS_ANALYSING = 'Analysing';
-    const STATUS_TO_DEVELOP = 'To Develop';
-    const STATUS_TO_QUALITY = 'To Quality';
-    const STATUS_ANALYSED = 'Analysed';
-    const STATUS_DEV_DONE = 'Dev Done';
-    const STATUS_READY_TO_DEPLOY = 'Ready to Deploy';
-    const STATUS_QA_DONE = 'QA Done';
-    const STATUS_RAW_REQUEST = 'Raw Request';
-
     const HISTORY_ITEM_TYPE_STATUS = 'status';
 
     private $api;
@@ -65,9 +54,9 @@ class JIRAService
         }
     }
 
-    public function getPersistedIssues()
+    public function getPersistedIssues(Array $statuses=null)
     {
-        return $this->daoJIRAIssues->searchJIRAIssues();
+        return $this->daoJIRAIssues->searchJIRAIssues($statuses);
     }
 
     /**
@@ -127,91 +116,45 @@ class JIRAService
     public function getPersistedIssuesTimeSpent(Array $issues)
     {
         $fields = array(DAOJIRAIssues::HISTORY_ITEM_FIELD_STATUS);
-        $fromStrings = array(DAOJIRAIssues::HISTORY_STATUS_DEV_IN_PROGRESS,
-            DAOJIRAIssues::HISTORY_STATUS_QA_IN_PROGRESS);
-        $toStrings = array(DAOJIRAIssues::HISTORY_STATUS_DEV_IN_PROGRESS,
-            DAOJIRAIssues::HISTORY_STATUS_QA_IN_PROGRESS);
+        $fromStrings = array(DAOJIRAIssues::STATUS_DEV_IN_PROGRESS,
+            DAOJIRAIssues::STATUS_QA_IN_PROGRESS);
+        $toStrings = array(DAOJIRAIssues::STATUS_DEV_IN_PROGRESS,
+            DAOJIRAIssues::STATUS_QA_IN_PROGRESS);
 
         $issuesTimeSpent = array();
         $now = new DateTime();
 
         foreach ($issues as $issue){
-            $issuesTimeSpent = 0;
             $issueHistories = $this->daoJIRAIssues->searchJIRAIssueHistories($issue->getIssueKey(),$fields,
                 $fromStrings,$toStrings);
+            $timeIntervals = array();
+            $timeInterval = null;
             foreach ($issueHistories as $issueHistory) {
 
-                if ($issueHistory->getToString()==DAOJIRAIssues::HISTORY_STATUS_DEV_IN_PROGRESS)
+                if ($issueHistory->getToString()==DAOJIRAIssues::STATUS_DEV_IN_PROGRESS)
                 {
-
+                    if (!is_null($timeInterval)) {
+                        $timeIntervals[] = $timeInterval;
+                    }
+                    $timeInterval = array('start'=>$issueHistory->getHistoryDatetime(),'end'=>$now->format(DATE_ISO8601));
                 }
 
-                if ($issueHistory->getFromString()==DAOJIRAIssues::HISTORY_STATUS_DEV_IN_PROGRESS)
+                if ($issueHistory->getFromString()==DAOJIRAIssues::STATUS_DEV_IN_PROGRESS)
                 {
-
-                }
-
-//                if ($historyItem['fromString'] == self::STATUS_TO_DEVELOP && $historyItem['toString'] == self::STATUS_DEV_IN_PROGRESS) {
-//                    if (!is_null($timeInterval)) {
-//                        $timeIntervals[] = $timeInterval;
-//                    }
-//                    $timeInterval = array('start' => $history['created'], 'end' => $now->format(DATE_ISO8601));
-//                }
-//                if ($historyItem['toString'] == self::STATUS_DEV_DONE || $historyItem['toString'] == self::STATUS_TO_DEVELOP) {
-//                    if (is_array($timeInterval)) {
-//                        $timeInterval['end'] = $history['created'];
-//                        $timeIntervals[] = $timeInterval;
-//                        $timeInterval = null;
-//                    }
-//                }
-
-            }
-        }
-    }
-
-    public function getIssuesTimeSpent(Array $issues)
-    {
-        $issuesTimeSpent = array();
-        foreach ($issues as $issue) {
-            var_dump($issue);
-            /**@var $issue JIRAIssue */
-            $issueTimeSpent = 0;
-            if ($issue->getOriginalEstimate() != null) {
-                $JiraApiResult = $this->api->getIssue($issue->getIssueKey(), "changelog");
-                /**@var $JiraApiResult Jira_Api_Result */
-                $expandedInformation = $JiraApiResult->getResult();
-                $changelog = $expandedInformation['changelog'];
-                $timeIntervals = array();
-                $timeInterval = null;
-                $now = new DateTime();
-                foreach ($changelog['histories'] as $history) {
-                    var_dump($history);
-                    foreach ($history['items'] as $historyItem) {
-                        if ($historyItem['field'] == 'status') {
-                            if ($historyItem['fromString'] == self::STATUS_TO_DEVELOP && $historyItem['toString'] == self::STATUS_DEV_IN_PROGRESS) {
-                                if (!is_null($timeInterval)) {
-                                    $timeIntervals[] = $timeInterval;
-                                }
-                                $timeInterval = array('start' => $history['created'], 'end' => $now->format(DATE_ISO8601));
-                            }
-                            if ($historyItem['toString'] == self::STATUS_DEV_DONE || $historyItem['toString'] == self::STATUS_TO_DEVELOP) {
-                                if (is_array($timeInterval)) {
-                                    $timeInterval['end'] = $history['created'];
-                                    $timeIntervals[] = $timeInterval;
-                                    $timeInterval = null;
-                                }
-                            }
-                        }
+                    if (is_array($timeInterval)) {
+                        $timeInterval['end'] = $issueHistory->getHistoryDatetime();
+                    }
+                    else
+                    {
+                        throw new Exception("Interval start not found for issue:".$issue->getIssueKey());
                     }
                 }
-                if (!is_null($timeInterval)){
-                    $timeIntervals[] = $timeInterval;
-                }
-                $issueTimeSpent = $this->timeService->getWorkingHours($timeIntervals);
+            }
+            if (!is_null($timeInterval)) {
+                $timeIntervals[] = $timeInterval;
             }
 
-            $issuesTimeSpent[$issue->getIssueKey()] = $issueTimeSpent;
-
+            $issuesTimeSpent[$issue->getIssueKey()] = $this->timeService->getWorkingHours($timeIntervals);
         }
 
         return $issuesTimeSpent;

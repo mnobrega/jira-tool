@@ -15,9 +15,16 @@ class DAOJIRAIssues extends PDOSingleton
 
     const HISTORY_ITEM_FIELD_STATUS = 'status';
 
-    const HISTORY_STATUS_DEV_IN_PROGRESS = 'Dev In Progress';
-    const HISTORY_STATUS_QA_IN_PROGRESS = 'QA In Progress';
-    const HISTORY_STATUS_ANALYSING = 'Analysing';
+    const STATUS_RAW_REQUEST = 'Raw Request';
+    const STATUS_ANALYSING = 'Analysing';
+    const STATUS_ANALYSED = 'Analysed';
+    const STATUS_TO_DEVELOP = 'To Develop';
+    const STATUS_TO_QUALITY = 'To Quality';
+    const STATUS_DEV_IN_PROGRESS = 'Dev In Progress';
+    const STATUS_QA_IN_PROGRESS = 'QA In Progress';
+    const STATUS_DEV_DONE = 'Dev Done';
+    const STATUS_QA_DONE = 'QA Done';
+    const STATUS_READY_TO_DEPLOY = 'Ready to Deploy';
 
     public function __construct()
     {
@@ -25,11 +32,15 @@ class DAOJIRAIssues extends PDOSingleton
     }
 
     /**
+     * @param $statuses array
      * @return JIRAIssueTblTuple []
      */
-    public function searchJIRAIssues()
+    public function searchJIRAIssues(Array $statuses=null)
     {
-        $query = "SELECT * FROM ".self::TABLENAME_JIRA_ISSUES;
+        $query = "SELECT ji.*
+                    FROM ".self::TABLENAME_JIRA_ISSUES." ji
+                    WHERE ji.id=ji.id
+                        ".(!is_null($statuses)?" AND ji.issue_status IN ".$this->inArray($statuses):"");
         return $this->getObjArray($this->query($query),"JIRAIssueTblTuple");
     }
 
