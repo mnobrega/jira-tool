@@ -40,11 +40,8 @@ class IssuesTable extends AbstractMigration
             ->addColumn('release_date','date',array('null'=>true))
             ->addColumn('labels','text',array('null'=>true))
             ->addColumn('assignee','string',array('null'=>true))
+            ->addColumn('requestor','string',array('null'=>true))
             ->addIndex(array('issue_key'),array('unique'=>true))
-            ->setOptions([
-                'encoding'  => 'utf8',
-                'collation' => 'utf8_general_ci',
-            ])
             ->addTimestamps()
             ->save();
     }

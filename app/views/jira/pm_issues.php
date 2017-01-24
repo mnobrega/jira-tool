@@ -15,9 +15,9 @@
     <thead>
         <tr>
             <th>Issue</th>
-            <th>Status</th>
-            <th>Deploy</th>
+            <th>Type</th>
             <th>Priority</th>
+            <th>Requestor</th>
             <th>Summary</th>
             <th>Days (E)</th>
         </tr>
@@ -26,9 +26,9 @@
         <?php foreach ($issues as $issue) {?>
         <tr>
             <td><a href="http://market.kujira.premium-minds.com/browse/<?php echo $issue->getIssueKey();?>" target="_blank"><?php echo $issue->getIssueKey();?></a></td>
-            <td><?php echo $issue->getIssueStatus();?></td>
-            <td><?php echo $issue->getReleaseDate();?></td>
+            <td><?php echo $issue->getIssueType();?></td>
             <td><?php echo $issue->getPriority();?></td>
+            <td><?php echo $issue->getRequestor();?></td>
             <td><?php echo $issue->getSummary();?></td>
             <td><?php echo round($issue->getOriginalEstimate()/3600/8,1);?></td>
         </tr>
@@ -39,16 +39,16 @@
 <script>
     $(document).ready( function () {
         $('#tableIssuesProgressId').DataTable({
-            "pageLength":20,
+            "pageLength":35,
             dom: 'Bfrtip',
             buttons: ['excel'],
             columns: [
-                {"width":"9%"},
-                {"width":"11%"},
                 {"width":"8%"},
+                {"width":"7%"},
+                {"width":"6%"},
                 {"width":"10%"},
-                {"width":"45%"},
-                {"width":"6%"}
+                {"width":"58%"},
+                {"width":"5%"}
             ]
         });
     } );

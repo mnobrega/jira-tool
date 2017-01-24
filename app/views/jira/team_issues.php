@@ -23,7 +23,7 @@
             <th>Status</th>
             <th>Deploy</th>
             <th>Priority</th>
-            <th>Assignee</th>
+            <th>Requestor</th>
             <th>Summary</th>
             <th>Days (R/E)</th>
             <th>Progress (%)</th>
@@ -36,7 +36,7 @@
             <td><?php echo $issue->getIssueStatus();?></td>
             <td><?php echo $issue->getReleaseDate();?></td>
             <td><?php echo $issue->getPriority();?></td>
-            <td><?php echo $issue->getAssignee();?></td>
+            <td><?php echo $issue->getRequestor();?></td>
             <td><?php echo $issue->getSummary();?></td>
             <td><?php echo round($issuesTimeSpent[$issue->getIssueKey()]/8,1);?> / <?php echo round($issue->getOriginalEstimate()/3600/8,1);?></td>
             <td><?php echo (round($issue->getOriginalEstimate()/3600,2)!=0?round($issuesTimeSpent[$issue->getIssueKey()]/round($issue->getOriginalEstimate()/3600,2),2)*100:0);?></td>
@@ -52,14 +52,14 @@
             dom: 'Bfrtip',
             buttons: ['excel'],
             columns: [
-                {"width":"9%"},
-                {"width":"11%"},
+                {"width":"6%"},
+                {"width":"8%"},
                 {"width":"8%"},
                 {"width":"5%"},
                 {"width":"10%"},
-                {"width":"45%"},
+                {"width":"50%"},
                 {"width":"6%"},
-                {"width":"6%"}
+                {"width":"7%"}
             ]
         });
     } );

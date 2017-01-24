@@ -47,7 +47,8 @@ class DAOJIRAIssues extends PDOSingleton
     public function insertJIRAIssue(JIRAIssueTblTuple $tuple)
     {
         $query = "INSERT INTO ".self::TABLENAME_JIRA_ISSUES." (issue_key, issue_status, summary, release_summary,
-            priority, issue_type, project, original_estimate, remaining_estimate, release_date, labels, assignee)
+            priority, issue_type, project, original_estimate, remaining_estimate, release_date, labels, assignee,
+            requestor)
             VALUES (
                 '".$tuple->getIssueKey()."',
                 '".$tuple->getIssueStatus()."',
@@ -60,7 +61,8 @@ class DAOJIRAIssues extends PDOSingleton
                 ".(!is_null($tuple->getRemainingEstimate())?$tuple->getRemainingEstimate():"NULL").",
                 ".(!is_null($tuple->getReleaseDate())?"'".$tuple->getReleaseDate()."'":"NULL").",
                 '".$tuple->getLabels()."',
-                '".$tuple->getAssignee()."')";
+                '".$tuple->getAssignee()."',
+                ".(!is_null($tuple->getRequestor())?"'".$tuple->getRequestor()."'":"NULL").")";
 
         $this->query($query);
     }
@@ -125,6 +127,7 @@ class JIRAIssueTblTuple
     private $releaseDate;
     private $labels;
     private $assignee;
+    private $requestor;
 
     public function __construct($row)
     {
@@ -140,6 +143,7 @@ class JIRAIssueTblTuple
         $this->releaseDate = $row['release_date'];
         $this->labels = $row['labels'];
         $this->assignee = $row['assignee'];
+        $this->requestor = $row['requestor'];
     }
 
     public function getIssueKey() { return $this->issueKey;}
@@ -154,6 +158,7 @@ class JIRAIssueTblTuple
     public function getReleaseDate() { return $this->releaseDate;}
     public function getLabels() { return $this->labels;}
     public function getAssignee() { return $this->assignee;}
+    public function getRequestor() { return $this->requestor;}
 }
 
 class JIRAIssueHistoryTblTuple

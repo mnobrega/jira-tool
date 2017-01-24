@@ -6,7 +6,7 @@
 
         <div class="panel panel-default">
             <div class="panel-body">
-                Ferramentas para JIRA da equipa Market & Mobility
+                Ferramentas JIRA para equipa eos Market & eos Mobility
             </div>
         </div>
     </body>

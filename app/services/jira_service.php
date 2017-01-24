@@ -54,6 +54,10 @@ class JIRAService
         }
     }
 
+    /**
+     * @param array|null $statuses
+     * @return JIRAIssueTblTuple []
+     */
     public function getPersistedIssues(Array $statuses=null)
     {
         return $this->daoJIRAIssues->searchJIRAIssues($statuses);
@@ -174,6 +178,7 @@ class JIRAIssue
     private $assignee;
     private $releaseSummary;
     private $issueStatus;
+    private $requestor;
 
     public function __construct(Jira_Issue $issue)
     {
@@ -194,6 +199,7 @@ class JIRAIssue
         $this->assignee = $fields['Assignee']['displayName'];
         $this->releaseSummary = $fields['Release Summary'];
         $this->issueStatus = $status['name'];
+        $this->requestor = $fields['Requestor']['value'];
     }
 
     public function getIssueKey() { return $this->issueKey;}
@@ -208,6 +214,7 @@ class JIRAIssue
     public function getAssignee() { return $this->assignee;}
     public function getReleaseSummary(){ return $this->releaseSummary;}
     public function getIssueStatus() { return $this->issueStatus;}
+    public function getRequestor() { return $this->requestor;}
 
     public function toArray()
     {
