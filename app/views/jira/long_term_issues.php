@@ -41,6 +41,7 @@
         $('#tableIssuesProgressId').DataTable({
             "pageLength":35,
             dom: 'Bfrtip',
+            order: [[2,"asc"]],
             buttons: ['excel'],
             columns: [
                 {"width":"8%"},

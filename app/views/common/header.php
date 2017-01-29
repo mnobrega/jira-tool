@@ -19,4 +19,6 @@
     <script type="text/javascript" language="javascript" src="/js/buttons.flash.min.js"></script>
     <script type="text/javascript" language="javascript" src="/js/buttons.colVis.min.js"></script>
     <script type="text/javascript" language="javascript" src="/js/buttons.print.min.js"></script>
+    <script type="text/javascript" language="javascript" src="/js/fusioncharts.js"></script>
+    <script type="text/javascript" language="javascript" src="/js/fusioncharts.gantt.js"></script>
 </head>

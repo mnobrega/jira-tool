@@ -40,7 +40,11 @@ class IssuesTable extends AbstractMigration
             ->addColumn('release_date','date',array('null'=>true))
             ->addColumn('labels','text',array('null'=>true))
             ->addColumn('assignee','string',array('null'=>true))
+            ->addColumn('assignee_key','string',array('null'=>true))
             ->addColumn('requestor','string',array('null'=>true))
+            ->addColumn('epic_name','string',array('null'=>true))
+            ->addColumn('epic_link','string',array('null'=>true))
+            ->addColumn('epic_colour','string',array('null'=>true))
             ->addIndex(array('issue_key'),array('unique'=>true))
             ->addTimestamps()
             ->save();

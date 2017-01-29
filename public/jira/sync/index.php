@@ -19,8 +19,18 @@ $selectedIssuesHistoryTypes = array(
     JIRAService::HISTORY_ITEM_TYPE_STATUS
 );
 
+$selectedIssuesTypes = array (
+    DAOJIRAIssues::TYPE_EPIC
+);
+
+$epicIssues = array();
 $issues = array();
 $issuesTimeSpent = array();
+
+//$JIRAService->deleteAllPersistedIssues();
+
+$epicIssues = $JIRAService->getIssuesByTypes($selectedIssuesTypes);
+$JIRAService->persistIssues($epicIssues);
 
 $issues = $JIRAService->getIssuesByStatuses($selectedStatuses);
 $JIRAService->persistIssues($issues);

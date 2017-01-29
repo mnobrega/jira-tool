@@ -26,6 +26,12 @@ class DAOJIRAIssues extends PDOSingleton
     const STATUS_QA_DONE = 'QA Done';
     const STATUS_READY_TO_DEPLOY = 'Ready to Deploy';
 
+    const TYPE_EPIC = 'Epic';
+    const TYPE_STORY = 'Story';
+    const TYPE_TASK = 'Task';
+    const TYPE_BUG = 'Bug';
+    const TYPE_SUB_TASK = 'Sub-task';
+
     public function __construct()
     {
         parent::__construct();
@@ -33,22 +39,28 @@ class DAOJIRAIssues extends PDOSingleton
 
     /**
      * @param $statuses array
+     * @param $types array
      * @return JIRAIssueTblTuple []
      */
-    public function searchJIRAIssues(Array $statuses=null)
+    public function searchJIRAIssues(Array $statuses=null, Array $types=null)
     {
         $query = "SELECT ji.*
                     FROM ".self::TABLENAME_JIRA_ISSUES." ji
                     WHERE ji.id=ji.id
-                        ".(!is_null($statuses)?" AND ji.issue_status IN ".$this->inArray($statuses):"");
+                        ".(!is_null($statuses)?" AND ji.issue_status IN ".$this->inArray($statuses):"")."
+                        ".(!is_null($types)?" AND ji.issue_type IN ".$this->inArray($types):"")."
+                    ORDER BY ji.priority ASC";
         return $this->getObjArray($this->query($query),"JIRAIssueTblTuple");
     }
 
+    /**
+     * @param JIRAIssueTblTuple $tuple
+     */
     public function insertJIRAIssue(JIRAIssueTblTuple $tuple)
     {
         $query = "INSERT INTO ".self::TABLENAME_JIRA_ISSUES." (issue_key, issue_status, summary, release_summary,
             priority, issue_type, project, original_estimate, remaining_estimate, release_date, labels, assignee,
-            requestor)
+            assignee_key, requestor, epic_name, epic_link, epic_colour)
             VALUES (
                 '".$tuple->getIssueKey()."',
                 '".$tuple->getIssueStatus()."',
@@ -62,7 +74,11 @@ class DAOJIRAIssues extends PDOSingleton
                 ".(!is_null($tuple->getReleaseDate())?"'".$tuple->getReleaseDate()."'":"NULL").",
                 '".$tuple->getLabels()."',
                 '".$tuple->getAssignee()."',
-                ".(!is_null($tuple->getRequestor())?"'".$tuple->getRequestor()."'":"NULL").")";
+                '".$tuple->getAssigneeKey()."',
+                ".(!is_null($tuple->getRequestor())?"'".$tuple->getRequestor()."'":"NULL").",
+                ".(!is_null($tuple->getEpicName())?"'".$tuple->getEpicName()."'":"NULL").",
+                ".(!is_null($tuple->getEpicLink())?"'".$tuple->getEpicLink()."'":"NULL").",
+                ".(!is_null($tuple->getEpicColour())?"'".$tuple->getEpicColour()."'":"NULL").")";
 
         $this->query($query);
     }
@@ -88,6 +104,9 @@ class DAOJIRAIssues extends PDOSingleton
         return $this->getObjArray($this->query($query),"JIRAIssueHistoryTblTuple");
     }
 
+    /**
+     * @param JIRAIssueHistoryTblTuple $tuple
+     */
     public function insertJIRAIssueHistory(JIRAIssueHistoryTblTuple $tuple)
     {
         $query = "INSERT INTO ".self::TABLENAME_JIRA_ISSUES_HISTORIES." (issue_key, history_datetime, field,
@@ -127,7 +146,11 @@ class JIRAIssueTblTuple
     private $releaseDate;
     private $labels;
     private $assignee;
+    private $assigneeKey;
     private $requestor;
+    private $epicName;
+    private $epicLink;
+    private $epicColour;
 
     public function __construct($row)
     {
@@ -143,7 +166,11 @@ class JIRAIssueTblTuple
         $this->releaseDate = $row['release_date'];
         $this->labels = $row['labels'];
         $this->assignee = $row['assignee'];
+        $this->assigneeKey = $row['assignee_key'];
         $this->requestor = $row['requestor'];
+        $this->epicName = $row['epic_name'];
+        $this->epicLink = $row['epic_link'];
+        $this->epicColour = $row['epic_colour'];
     }
 
     public function getIssueKey() { return $this->issueKey;}
@@ -158,7 +185,11 @@ class JIRAIssueTblTuple
     public function getReleaseDate() { return $this->releaseDate;}
     public function getLabels() { return $this->labels;}
     public function getAssignee() { return $this->assignee;}
+    public function getAssigneeKey() { return $this->assigneeKey;}
     public function getRequestor() { return $this->requestor;}
+    public function getEpicName() { return $this->epicName;}
+    public function getEpicLink() { return $this->epicLink;}
+    public function getEpicColour() { return $this->epicColour;}
 }
 
 class JIRAIssueHistoryTblTuple
