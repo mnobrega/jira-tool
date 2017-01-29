@@ -14,11 +14,8 @@ class JIRAService
     const RESOURCE_TYPE_DEV = 'dev';
     const RESOURCE_TYPE_QA = 'qa';
 
-    private $api;
-    private $walker;
-    private $timeService;
-
-    private $daoJIRAIssues;
+    const WORKING_DAY_HOURS = 8;
+    const DEFAULT_GANTT_ISSUE_COLOR = '#cccccc';
 
     static $projectUsersToResourcesMapping = array(
         "eos Market" => array(
@@ -60,6 +57,12 @@ class JIRAService
         "ghx-label-8" => "#654982",
         "ghx-label-9" => "#f15c75"
     );
+
+    private $api;
+    private $walker;
+    private $timeService;
+
+    private $daoJIRAIssues;
 
     function __construct()
     {
@@ -236,6 +239,10 @@ class JIRAService
             DAOJIRAIssues::TYPE_BUG
         );
 
+        $epicTypes = array (
+            DAOJIRAIssues::TYPE_EPIC
+        );
+
         $inProgressIssueStatuses = array(
             DAOJIRAIssues::STATUS_DEV_IN_PROGRESS,
             DAOJIRAIssues::STATUS_QA_IN_PROGRESS
@@ -243,53 +250,25 @@ class JIRAService
 
         $todoIssueStatuses = array (
             DAOJIRAIssues::STATUS_TO_DEVELOP,
-            DAOJIRAIssues::STATUS_TO_QUALITY,
+            DAOJIRAIssues::STATUS_TO_QUALITY
+        );
+
+        $longTermIssuesStatus = array (
             DAOJIRAIssues::STATUS_ANALYSED
         );
 
         $resourcesIssues = array();
-        $resourcesIssuesTimeSpent = array();
 
         $inProgressIssues = $this->getPersistedIssues($inProgressIssueStatuses, $selectedTypes);
         $resourcesIssuesTimeSpent = $this->getPersistedIssuesTimeSpent($inProgressIssues);
-        foreach ($inProgressIssues as $issue)
-        {
-            if ($issue->getAssigneeKey()!='')
-            {
-                $resource = self::$projectUsersToResourcesMapping[$issue->getProject()][$issue->getAssigneeKey()];
-            }
-            else
-            {
-                $resource = $this->findIssueBestFitResource($issue,$resourcesIssues);
-            }
-            if (!array_key_exists($resource,$resourcesIssues))
-            {
-                $resourcesIssues[$resource] = array();
-            }
-            $resourcesIssues[$resource][] = $issue;
-        }
+        $this->addToResourcesIssues($resourcesIssues,$inProgressIssues);
 
         $todoIssues = $this->getPersistedIssues($todoIssueStatuses,$selectedTypes);
         $resourcesIssuesTimeSpent = array_merge($resourcesIssuesTimeSpent,$this->getPersistedIssuesTimeSpent($todoIssues));
-        foreach ($todoIssues as $issue)
-        {
-            if ($issue->getAssigneeKey()!='')
-            {
-                $resource = self::$projectUsersToResourcesMapping[$issue->getProject()][$issue->getAssigneeKey()];
-            }
-            else
-            {
-                $resource = $this->findIssueBestFitResource($issue,$resourcesIssues);
-            }
-            if (!array_key_exists($resource,$resourcesIssues))
-            {
-                $resourcesIssues[$resource] = array();
-            }
-            $resourcesIssues[$resource][] = $issue;
-        }
+        $this->addToResourcesIssues($resourcesIssues,$todoIssues);
 
         $epicIssuesMap = array();
-        $epicIssues = $this->getPersistedIssues(null,array(DAOJIRAIssues::TYPE_EPIC));
+        $epicIssues = $this->getPersistedIssues(null,$epicTypes);
         foreach ($epicIssues as $epicIssue)
         {
             if (!array_key_exists($epicIssue->getIssueKey(),$epicIssuesMap))
@@ -301,14 +280,71 @@ class JIRAService
             }
         }
 
-        foreach ($resourcesIssues as $resource=>$issue)
+        $JIRAGanttIssues = array();
+        $now = new DateTime();
+        foreach ($resourcesIssues as $resource=>$issues)
         {
-
+            $JIRAGanttIssues[$resource] = array();
+            $latestEnd = null;
+            foreach ($issues as $issue)
+            {
+                /**@var $issue JIRAIssueTblTuple */
+                $row = array();
+                $row['resource'] = $resource;
+                $row['issueKey'] = $issue->getIssueKey();
+                $row['priority'] = $issue->getPriority();
+                $row['status'] = $issue->getIssueStatus();
+                $row['workingDaysLeft'] = max(0.00,ceil(($issue->getOriginalEstimate()/3600 -
+                        $resourcesIssuesTimeSpent[$issue->getIssueKey()])/self::WORKING_DAY_HOURS));
+                $row['label'] = $issue->getIssueKey()." ".$issue->getSummary();
+                $row['color'] = (!is_null($issue->getEpicLink())?$epicIssuesMap[$issue->getEpicLink()]['color']:
+                    self::DEFAULT_GANTT_ISSUE_COLOR);
+                $row['start'] = (is_null($latestEnd)?$now->format("Y-m-d"):$latestEnd);
+                $row['end'] = $this->getJIRAGanntEndDate($row['start'],$row['workingDaysLeft']);
+                $latestEnd = $row['end'];
+                $JIRAGanttIssues[$resource][] = new JIRAGanttIssue($row);
+            }
         }
 
-        var_dump($epicIssuesMap);
+        var_dump($JIRAGanttIssues);
+        die();
+
+//        var_dump($resourcesIssuesTimeSpent);
+//        die();
+//        var_dump($epicIssuesMap);
         var_dump($resourcesIssues);
         die();
+    }
+
+    private function getJIRAGanntEndDate($startDate, $workingDays)
+    {
+        $endDate = null;
+        return $endDate;
+    }
+
+    /**
+     * @param $resourcesIssues
+     * @param $issues JIRAIssueTblTuple []
+     * @throws JIRAServiceException
+     */
+    private function addToResourcesIssues(Array &$resourcesIssues, $issues)
+    {
+        foreach ($issues as $issue)
+        {
+            if ($issue->getAssigneeKey()!='')
+            {
+                $resource = self::$projectUsersToResourcesMapping[$issue->getProject()][$issue->getAssigneeKey()];
+            }
+            else
+            {
+                $resource = $this->findIssueBestFitResource($issue,$resourcesIssues);
+            }
+            if (!array_key_exists($resource,$resourcesIssues))
+            {
+                $resourcesIssues[$resource] = array();
+            }
+            $resourcesIssues[$resource][] = $issue;
+        }
     }
 
     private function findIssueBestFitResource(JIRAIssueTblTuple $issue, Array $resourcesIssues=null)
@@ -369,23 +405,32 @@ class JIRAGanttIssue
 {
     private $resource;
     private $issueKey;
-    private $start;
-    private $end;
+    private $priority;
+    private $status;
+    private $workingDaysLeft;
     private $label;
     private $color;
+    private $start;
+    private $end;
 
     public function __construct($row)
     {
         $this->resource = $row['resource'];
         $this->issueKey = $row['issueKey'];
+        $this->priority = $row['priority'];
+        $this->status = $row['status'];
+        $this->workingDaysLeft = $row['workingDaysLeft'];
         $this->start = $row['start'];
         $this->end = $row['end'];
         $this->label = $row['label'];
-        $this->color = $row['label'];
+        $this->color = $row['color'];
     }
 
     public function getResource() { return $this->resource;}
     public function getIssueKey() { return $this->issueKey;}
+    public function getPriority() { return $this->priority;}
+    public function getStatus() { return $this->status;}
+    public function getWorkingDaysLeft() { return $this->workingDaysLeft;}
     public function getStart() { return $this->start;}
     public function getEnd() { return $this->end;}
     public function getLabel() { return $this->label;}

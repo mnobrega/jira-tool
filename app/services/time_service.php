@@ -2,15 +2,21 @@
 
 class TimeService
 {
+    static $holidays = array('2017-01-01');
+
     public function __construct()
     {
         //do nothing
     }
 
+    public function getEndDateFromWorkingHours ($firstDate, $workingHours)
+    {
+        //TODO
+    }
+
     public function getWorkingHours(Array $timeIntervals)
     {
-        $holiday = array('2015-10-12');
-        $noofholiday = sizeof($holiday);
+        $noofholiday = sizeof(self::$holidays);
         $workhours = 0;
         
         foreach ($timeIntervals as $timeInterval)
@@ -34,27 +40,31 @@ class TimeService
                     $holiday = false;
                     for ($k = 0; $k < $noofholiday; $k++)   //excluding holidays
                     {
-                        if ($i == $holiday[$k]) {
+                        if ($i == self::$holidays[$k]) {
                             $holiday = true;
                             break;
                         }
                     }
                     $day = $i->format('l');
-                    if ($day === 'Saturday' || $day === 'Sunday')  //excluding saturday, sunday
+                    if ($day === 'Saturday' || $day === 'Sunday') { //excluding saturday, sunday
                         $holiday = true;
-
+                    }
                     if (!$holiday) {
                         $ii = $i->format('Y-m-d');
                         $f = $firstdate->format('Y-m-d');
                         $l = $lastdate->format('Y-m-d');
-                        if ($l == $f)
+                        if ($l == $f) {
                             $workhours += $this->sameday($firstdate, $lastdate);
-                        else if ($ii === $f)
+                        }
+                        else if ($ii === $f) {
                             $workhours += $this->firstday($firstdate);
-                        else if ($l === $ii)
+                        }
+                        else if ($l === $ii) {
                             $workhours += $this->lastday($lastdate);
-                        else
+                        }
+                        else {
                             $workhours += 8;
+                        }
                     }
                 }
             }
