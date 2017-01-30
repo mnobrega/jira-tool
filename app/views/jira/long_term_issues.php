@@ -8,7 +8,13 @@
         DAOJIRAIssues::STATUS_ANALYSED,
     );
 
-    $issues = $JIRAService->getPersistedIssues($selectedStatuses);
+    $selectedTypes = array (
+        DAOJIRAIssues::TYPE_STORY,
+        DAOJIRAIssues::TYPE_BUG,
+        DAOJIRAIssues::TYPE_TASK
+    );
+
+    $issues = $JIRAService->getPersistedIssues($selectedStatuses, $selectedTypes);
     $issuesTimeSpent = $JIRAService->getPersistedIssuesTimeSpent($issues);
 ?>
 <table id="tableIssuesProgressId" class="table table-striped table-bordered table-condensed">

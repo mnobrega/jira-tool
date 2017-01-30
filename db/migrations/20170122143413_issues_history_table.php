@@ -34,10 +34,6 @@ class IssuesHistoryTable extends AbstractMigration
             ->addColumn('from_string','string',array('limit'=>50))
             ->addColumn('to_string','string',array('limit'=>50))
             ->addIndex('issue_key')
-            ->setOptions([
-                'encoding'  => 'utf8',
-                'collation' => 'utf8_general_ci',
-            ])
             ->addTimestamps()
             ->save();
     }
