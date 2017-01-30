@@ -16,6 +16,9 @@ class JIRAService
 
     const WORKING_DAY_HOURS = 8;
     const DEFAULT_GANTT_ISSUE_COLOR = '#cccccc';
+    const GANTT_ISSUE_COLOR_DELAYED = '#ff0000';
+
+    const DELAY_DAYS_THRESHOLD = 5; //days
 
     static $projectUsersToResourcesMapping = array(
         "eos Market" => array(
@@ -31,7 +34,7 @@ class JIRAService
             "lgoncalves"=>"MOBDEV2",
             "sottaviani"=>"QA1",
             "mmatos"=>"QA2",
-            "mnobrega"=>"QA1"
+            "mnobrega"=>"QA2"
         )
     );
 
@@ -257,6 +260,12 @@ class JIRAService
             DAOJIRAIssues::STATUS_ANALYSED
         );
 
+        $fields = array(DAOJIRAIssues::HISTORY_ITEM_FIELD_STATUS);
+        $fromStrings = array(DAOJIRAIssues::STATUS_DEV_IN_PROGRESS,
+            DAOJIRAIssues::STATUS_QA_IN_PROGRESS);
+        $toStrings = array(DAOJIRAIssues::STATUS_DEV_IN_PROGRESS,
+            DAOJIRAIssues::STATUS_QA_IN_PROGRESS);
+
         $resourcesIssues = array();
 
         $inProgressIssues = $this->getPersistedIssues($inProgressIssueStatuses, $selectedTypes);
@@ -266,6 +275,10 @@ class JIRAService
         $todoIssues = $this->getPersistedIssues($todoIssueStatuses,$selectedTypes);
         $resourcesIssuesTimeSpent = array_merge($resourcesIssuesTimeSpent,$this->getPersistedIssuesTimeSpent($todoIssues));
         $this->addToResourcesIssues($resourcesIssues,$todoIssues);
+
+        $longTermIssues = $this->getPersistedIssues($longTermIssuesStatus, $selectedTypes);
+        $resourcesIssuesTimeSpent = array_merge($resourcesIssuesTimeSpent,$this->getPersistedIssuesTimeSpent($longTermIssues));
+        $this->addToResourcesIssues($resourcesIssues, $longTermIssues);
 
         $epicIssuesMap = array();
         $epicIssues = $this->getPersistedIssues(null,$epicTypes);
@@ -285,41 +298,56 @@ class JIRAService
         foreach ($resourcesIssues as $resource=>$issues)
         {
             $JIRAGanttIssues[$resource] = array();
-            $latestEnd = null;
-            foreach ($issues as $issue)
-            {
+            $currentStart = null;
+            foreach ($issues as $issue) {
+
                 /**@var $issue JIRAIssueTblTuple */
-                $row = array();
-                $row['resource'] = $resource;
-                $row['issueKey'] = $issue->getIssueKey();
-                $row['priority'] = $issue->getPriority();
-                $row['status'] = $issue->getIssueStatus();
-                $row['workingDaysLeft'] = max(0.00,ceil(($issue->getOriginalEstimate()/3600 -
+                $workingDaysLeft = max(0.00,ceil(($issue->getOriginalEstimate()/3600 -
                         $resourcesIssuesTimeSpent[$issue->getIssueKey()])/self::WORKING_DAY_HOURS));
-                $row['label'] = $issue->getIssueKey()." ".$issue->getSummary();
-                $row['color'] = (!is_null($issue->getEpicLink())?$epicIssuesMap[$issue->getEpicLink()]['color']:
-                    self::DEFAULT_GANTT_ISSUE_COLOR);
-                $row['start'] = (is_null($latestEnd)?$now->format("Y-m-d"):$latestEnd);
-                $row['end'] = $this->getJIRAGanntEndDate($row['start'],$row['workingDaysLeft']);
-                $latestEnd = $row['end'];
-                $JIRAGanttIssues[$resource][] = new JIRAGanttIssue($row);
+
+                if ($workingDaysLeft>0) {
+                    $row = array();
+                    $row['resource'] = $resource;
+                    $row['issueKey'] = $issue->getIssueKey();
+                    $row['priority'] = $issue->getPriority();
+                    $row['status'] = $issue->getIssueStatus();
+                    $row['workingDaysLeft'] = $workingDaysLeft;
+                    $row['label'] = $issue->getIssueKey()." ".$issue->getSummary();
+                    $row['epicColor'] = (!is_null($issue->getEpicLink())?$epicIssuesMap[$issue->getEpicLink()]['color']:
+                        self::DEFAULT_GANTT_ISSUE_COLOR);
+                    $row['epicName'] = (!is_null($issue->getEpicLink())?$epicIssuesMap[$issue->getEpicLink()]['name']:"Outros");
+                    $row['start'] = (is_null($currentStart)?$now->format("Y-m-d 00:00:00"):$currentStart->format("Y-m-d H:i:s"));
+                    $endDate = $this->timeService->getEndDateFromWorkingHours(new DateTime($row['start']),
+                        $row['workingDaysLeft']);
+                    $endDate->modify("-1 seconds");
+                    $row['end'] = $endDate->format("Y-m-d H:i:s");
+                    if (!is_null($issue->getReleaseDate()))
+                    {
+                        $releaseDate = new DateTime($issue->getReleaseDate()." 20:00:00");
+                        $releaseDate->modify("-".self::DELAY_DAYS_THRESHOLD." days");
+                        if ($endDate->getTimestamp()>$releaseDate->getTimestamp())
+                        {
+                            $row['epicColor'] = self::GANTT_ISSUE_COLOR_DELAYED;
+                            $row['epicName'] = "DELAYED";
+                        }
+                    }
+                    if (is_null($currentStart) && in_array($issue->getIssueStatus(),$inProgressIssueStatuses))
+                    {
+                        $issueHistories = $this->daoJIRAIssues->searchJIRAIssueHistories($issue->getIssueKey(),$fields,
+                            $fromStrings,$toStrings);
+
+                        $row['start'] = $issueHistories[0]->getHistoryDatetime();
+                    }
+                    $currentStart = new DateTime($row['end']);
+                    $currentStart->modify("+1 second");
+                    $JIRAGanttIssues[$resource][] = new JIRAGanttIssue($row);
+                } else {
+                    //ignore issue
+                }
             }
         }
 
-        var_dump($JIRAGanttIssues);
-        die();
-
-//        var_dump($resourcesIssuesTimeSpent);
-//        die();
-//        var_dump($epicIssuesMap);
-        var_dump($resourcesIssues);
-        die();
-    }
-
-    private function getJIRAGanntEndDate($startDate, $workingDays)
-    {
-        $endDate = null;
-        return $endDate;
+        return $JIRAGanttIssues;
     }
 
     /**
@@ -409,7 +437,8 @@ class JIRAGanttIssue
     private $status;
     private $workingDaysLeft;
     private $label;
-    private $color;
+    private $epicColor;
+    private $epicName;
     private $start;
     private $end;
 
@@ -423,7 +452,8 @@ class JIRAGanttIssue
         $this->start = $row['start'];
         $this->end = $row['end'];
         $this->label = $row['label'];
-        $this->color = $row['color'];
+        $this->epicColor = $row['epicColor'];
+        $this->epicName = $row['epicName'];
     }
 
     public function getResource() { return $this->resource;}
@@ -434,7 +464,8 @@ class JIRAGanttIssue
     public function getStart() { return $this->start;}
     public function getEnd() { return $this->end;}
     public function getLabel() { return $this->label;}
-    public function getColor() { return $this->color;}
+    public function getEpicColor() { return $this->epicColor;}
+    public function getEpicName() { return $this->epicName;}
 }
 
 class JIRAIssue

@@ -9,9 +9,30 @@ class TimeService
         //do nothing
     }
 
-    public function getEndDateFromWorkingHours ($firstDate, $workingHours)
+    public function getEndDateFromWorkingHours (DateTime $startDate, $workingDays)
     {
-        //TODO
+        $endDate = clone($startDate);
+
+        $workingDaysCounter = 0;
+        while ($workingDaysCounter < $workingDays)
+        {
+            $isWorkingDay=true;
+
+            if (in_array($endDate->format("Y-m-d"),self::$holidays)) {
+                $isWorkingDay=false;
+            }
+            $weekDay = $endDate->format("l");
+            if ($weekDay === 'Saturday' || $weekDay === 'Sunday') {
+                $isWorkingDay=false;
+            }
+            if ($isWorkingDay) {
+                $workingDaysCounter++;
+            }
+
+            $endDate->modify("+1 day");
+        }
+
+        return $endDate;
     }
 
     public function getWorkingHours(Array $timeIntervals)

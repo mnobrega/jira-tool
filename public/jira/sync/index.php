@@ -27,7 +27,7 @@ $epicIssues = array();
 $issues = array();
 $issuesTimeSpent = array();
 
-//$JIRAService->deleteAllPersistedIssues();
+$JIRAService->deleteAllPersistedIssues();
 
 $epicIssues = $JIRAService->getIssuesByTypes($selectedIssuesTypes);
 $JIRAService->persistIssues($epicIssues);
