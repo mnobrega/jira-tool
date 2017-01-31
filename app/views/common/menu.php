@@ -16,7 +16,8 @@
             <ul class="nav navbar-nav">
                 <li><a href="/jira/team_issues/index.php">Short Term</a></li>
                 <li><a href="/jira/pm_issues/index.php">Long Term</a></li>
-                <li><a href="/jira/gantt/index.php">Gantt</a></li>
+                <li><a href="/jira/gantt/index.php">Ocupação Equipa</a></li>
+                <li><a href="#">Weekly Review</a></li>
             </ul>
         </div><!-- /.navbar-collapse -->
     </div><!-- /.container-fluid -->
