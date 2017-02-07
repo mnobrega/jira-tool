@@ -94,10 +94,6 @@
             "id" => "MOBDEV1"
         ),
         array (
-            "label" => "MOB-DEV-2",
-            "id" => "MOBDEV2"
-        ),
-        array (
             "label" => "APK-DEV-1",
             "id" => "APKDEV1"
         ),

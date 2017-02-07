@@ -15,7 +15,8 @@
         <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
             <ul class="nav navbar-nav">
                 <li><a href="/jira/team_issues/index.php">Short Term</a></li>
-                <li><a href="/jira/pm_issues/index.php">Long Term</a></li>
+                <li><a href="/jira/pm_issues/index.php">Medium Term</a></li>
+                <li><a href="#">Backlog</a></li>
                 <li><a href="/jira/gantt/index.php">Ocupação Equipa</a></li>
                 <li><a href="#">Weekly Review</a></li>
             </ul>

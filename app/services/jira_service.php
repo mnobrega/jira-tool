@@ -30,8 +30,8 @@ class JIRAService
         ),
         "eos Mobility" => array(
             "asoares"=>"MOBDEV1",
-            "sguerreiro"=>"MOBDEV2",
-            "lgoncalves"=>"MOBDEV2",
+            "sguerreiro"=>"MOBDEV1",
+            "lgoncalves"=>"MOBDEV1",
             "sottaviani"=>"QA1",
             "mmatos"=>"QA2",
             "mnobrega"=>"QA2"
@@ -44,7 +44,7 @@ class JIRAService
             "qa" => array("QA1","QA2")
         ),
         "eos Mobility" => array(
-            "dev" => array("MOBDEV1","MOBDEV2"),
+            "dev" => array("MOBDEV1"),
             "qa" => array("QA1","QA2")
         )
     );
@@ -135,6 +135,7 @@ class JIRAService
 
     /**
      * @param $issues JIRAIssue []
+     * @return Array
      */
     public function getIssuesHistories(Array $issues, Array $historyTypes)
     {
@@ -186,6 +187,7 @@ class JIRAService
 
     /**
      * @param $issues JIRAIssue []
+     * @return Array
      */
     public function getPersistedIssuesTimeSpent(Array $issues)
     {
