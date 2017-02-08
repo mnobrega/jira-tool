@@ -5,7 +5,8 @@
     $JIRAService = new JIRAService();
 
     //TIME WINDOW CONFIG
-    $ganttStartMonth = '2017-01';
+    $now = new Datetime();
+    $ganttStartMonth = $now->format("Y-m");
     $ganttMonthsNumber = 3;
     $JIRAIssueURL = "http://market.kujira.premium-minds.com/browse/";
 
