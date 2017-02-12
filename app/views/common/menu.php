@@ -16,7 +16,7 @@
             <ul class="nav navbar-nav">
                 <li><a href="#">Weekly Review</a></li>
                 <li><a href="/jira/team_issues/index.php">Short Term</a></li>
-                <li><a href="/jira/gantt/index.php">Ocupação Equipa (3 meses)</a>
+                <li><a href="/jira/team_roadmap/index.php">Ocupação Equipa (3 meses)</a>
                 <li><a href="#">Deploys</a></li>
                 <li><a href="/jira/pm_issues/index.php">Medium Term</a></li>
                 <li><a href="#">Backlog</a></li>

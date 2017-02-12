@@ -20,6 +20,11 @@ class JIRAService
 
     const DELAY_DAYS_THRESHOLD = 5; //days
 
+    static $projects = array (
+        "APK"=>"eos Market",
+        "MOB"=>"eos Mobility"
+    );
+
     static $projectUsersToResourcesMapping = array(
         "eos Market" => array(
             "lgoncalves"=>"APKDEV1",
@@ -74,6 +79,22 @@ class JIRAService
         $this->timeService = new TimeService();
 
         $this->daoJIRAIssues = new DAOJIRAIssues();
+    }
+
+    /**
+     * @return Array JIRAVersion []
+     */
+    public function getVersions()
+    {
+        $JIRAVersions = array();
+        foreach (self::$projects as $projectKey=>$project) {
+            $JIRAVersions[$projectKey] = array();
+            $versions = $this->api->getVersions($projectKey);
+            foreach ($versions as $version) {
+                $JIRAVersions[$projectKey][] = new JIRAVersion($version);
+            }
+        }
+        return $JIRAVersions;
     }
 
     /**
@@ -236,7 +257,7 @@ class JIRAService
         return $issuesTimeSpent;
     }
 
-    public function getGanttData()
+    public function getTeamRoadmapData()
     {
         $selectedTypes = array(
             DAOJIRAIssues::TYPE_STORY,
@@ -468,6 +489,27 @@ class JIRAGanttIssue
     public function getLabel() { return $this->label;}
     public function getEpicColor() { return $this->epicColor;}
     public function getEpicName() { return $this->epicName;}
+}
+
+class JIRAVersion
+{
+    private $id;
+    private $name;
+    private $released;
+    private $releaseDate;
+
+    public function __construct($row)
+    {
+        $this->id = $row['id'];
+        $this->name = $row['name'];
+        $this->released = $row['released'];
+        $this->releaseDate = $row['releaseDate'];
+    }
+
+    public function getId(){ return $this->id;}
+    public function getName() { return $this->name;}
+    public function getReleased() { return $this->released;}
+    public function getReleaseDate(){ return $this->releaseDate;}
 }
 
 class JIRAIssue

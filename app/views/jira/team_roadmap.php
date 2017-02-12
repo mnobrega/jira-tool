@@ -4,6 +4,9 @@
 
     $JIRAService = new JIRAService();
 
+    $JIRAResourcesIssues = $JIRAService->getTeamRoadmapData();
+    $JIRAVersions = $JIRAService->getVersions();
+
     //TIME WINDOW CONFIG
     $now = new Datetime();
     $ganttStartMonth = $now->format("Y-m");
@@ -11,35 +14,25 @@
     $JIRAIssueURL = "http://market.kujira.premium-minds.com/browse/";
 
     //GANT LINES
-    $ganttLines = array (
-        array (
-            "start" => "2017-01-31",
-            "displayValue" => "APK-JAN-1",
-            "color" => "#000000",
-            "thickness" => "2",
-            "dashed" => "1"
-        ),
-        array (
-            "start" => "2017-02-16",
-            "displayValue" => "APK-FEV-1",
-            "color" => "#000000",
-            "thickness" => "2",
-            "dashed" => "1"
-        ),
-        array (
-            "start" => "2017-02-09",
-            "displayValue" => "MOB-FEV-1",
-            "color" => "#000000",
-            "thickness" => "2",
-            "dashed" => "1"
-        ),
-        array (
-            "start" => "2017-02-22",
-            "displayValue" => "MOB-FEV-2",
-            "color" => "#000000",
-            "thickness" => "2",
-            "dashed" => "1"
-        )
+    $ganttLines = array();
+    foreach ($JIRAVersions as $project=>$versions) {
+        foreach ($versions as $JIRAVersion) {
+            if (!$JIRAVersion->getReleased()) {
+                $ganttLines[] = array (
+                    "start" => $JIRAVersion->getReleaseDate(),
+                    "displayValue" => $project."-".str_replace("-","",$JIRAVersion->getReleaseDate()),
+                    "color" => "#800000",
+                    "thickness" => "2",
+                    "dashed" => "0"
+                );
+            }
+        }
+    }
+    $ganttLines[] = array (
+        "start" => $now->format("Y-m-d"),
+        "displayValue" => "NOW",
+        "color" => "#000000",
+        "thickness" => "1"
     );
 
     //GANTT
@@ -109,7 +102,6 @@
     );
 
     //JIRA ISSUES
-    $JIRAResourcesIssues = $JIRAService->getGanttData();
     $ganttTasks = array();
     $epicsDetected = array();
     foreach ($JIRAResourcesIssues as $resource=>$issues) {
