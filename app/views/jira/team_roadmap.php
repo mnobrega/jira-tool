@@ -21,7 +21,7 @@
                 $ganttLines[] = array (
                     "start" => $JIRAVersion->getReleaseDate(),
                     "displayValue" => $project."-".str_replace("-","",$JIRAVersion->getReleaseDate()),
-                    "color" => "#800000",
+                    "color" => "#DC143C",
                     "thickness" => "2",
                     "dashed" => "0"
                 );

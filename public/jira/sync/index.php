@@ -5,6 +5,7 @@ require_once(DIR_SERVICES."jira_service.php");
 
 $JIRAService = new JIRAService();
 $selectedStatuses = array(
+    DAOJIRAIssues::STATUS_RAW_REQUEST,
     DAOJIRAIssues::STATUS_ANALYSING,
     DAOJIRAIssues::STATUS_ANALYSED,
     DAOJIRAIssues::STATUS_TO_QUALITY,
@@ -15,13 +16,6 @@ $selectedStatuses = array(
     DAOJIRAIssues::STATUS_QA_DONE,
     DAOJIRAIssues::STATUS_READY_TO_DEPLOY
 );
-$selectedIssuesHistoryTypes = array(
-    JIRAService::HISTORY_ITEM_TYPE_STATUS
-);
-
-$selectedIssuesTypes = array (
-    DAOJIRAIssues::TYPE_EPIC
-);
 
 $epicIssues = array();
 $issues = array();
@@ -29,13 +23,11 @@ $issuesTimeSpent = array();
 
 $JIRAService->deleteAllPersistedIssues();
 
-$epicIssues = $JIRAService->getIssuesByTypes($selectedIssuesTypes);
-$JIRAService->persistIssues($epicIssues);
-
 $issues = $JIRAService->getIssuesByStatuses($selectedStatuses);
 $JIRAService->persistIssues($issues);
 
-$issuesHistory = $JIRAService->getIssuesHistories($issues, $selectedIssuesHistoryTypes);
+$issuesHistory = $JIRAService->getIssuesHistories($issues, array(DAOJIRAIssues::TYPE_EPIC));
 $JIRAService->persistIssuesHistories($issuesHistory);
+
 
 echo "JIRA Sync finished successfully";

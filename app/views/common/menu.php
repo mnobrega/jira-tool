@@ -8,17 +8,17 @@
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
             </button>
-            <a class="navbar-brand" href="/index.php">eos Marketbility Team</a>
+            <a class="navbar-brand" href="/index.php">M&M Team</a>
         </div>
 
         <!-- Collect the nav links, forms, and other content for toggling -->
         <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
             <ul class="nav navbar-nav">
-                <li><a href="#">Weekly Review</a></li>
-                <li><a href="/jira/team_issues/index.php">Short Term</a></li>
+                <li><a href="/jira/weekly_review/index.php">Weekly Review</a></li>
+                <li><a href="/jira/short_term_issues/index.php">Short Term</a></li>
                 <li><a href="/jira/team_roadmap/index.php">Ocupação Equipa (3 meses)</a>
-                <li><a href="#">Deploys</a></li>
-                <li><a href="/jira/pm_issues/index.php">Medium Term</a></li>
+                <li><a href="#">Releases</a></li>
+                <li><a href="/jira/medium_term_issues/index.php">Medium Term</a></li>
                 <li><a href="#">Backlog</a></li>
                 <li><a href="#">Epics</a></li>
 

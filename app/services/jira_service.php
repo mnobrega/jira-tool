@@ -129,6 +129,57 @@ class JIRAService
         return $issues;
     }
 
+    /**
+     * @return JIRAIssue []
+     */
+    public function getPreviousWeekCreatedIssues()
+    {
+        $issues = array();
+        $this->walker->push('created > startOfWeek(-1w) AND created< startOfWeek()
+            AND type NOT IN ("'.DAOJIRAIssues::TYPE_EPIC.'")');
+        foreach ($this->walker as $issue) {
+            $issues[] = new JIRAIssue($issue);
+        }
+        return $issues;
+    }
+
+    /**
+     * @return JIRAIssue []
+     */
+    public function getPreviousWeekStartedIssues()
+    {
+        $issues = array();
+        $this->walker->push('((status changed from "'.DAOJIRAIssues::STATUS_TO_DEVELOP.'" TO
+                "'.DAOJIRAIssues::STATUS_DEV_IN_PROGRESS.'" after -1w) OR
+            (status changed from "'.DAOJIRAIssues::STATUS_TO_QUALITY.'" TO
+                 "'.DAOJIRAIssues::STATUS_QA_IN_PROGRESS.'" after -1w))
+            AND status NOT IN ("'.DAOJIRAIssues::STATUS_QA_DONE.'",
+                "'.DAOJIRAIssues::STATUS_DEV_DONE.'","'.DAOJIRAIssues::STATUS_READY_TO_DEPLOY.'")');
+        foreach ($this->walker as $issue) {
+            $issues[] = new JIRAIssue($issue);
+        }
+        return $issues;
+    }
+
+    /**
+     * @return JIRAIssue []
+     */
+    public function getPreviousWeekFinishedIssues()
+    {
+        $issues = array();
+        $this->walker->push('((status changed from "'.DAOJIRAIssues::STATUS_DEV_IN_PROGRESS.'" TO
+                "'.DAOJIRAIssues::STATUS_DEV_DONE.'" after -1w) OR
+            (status changed from "'.DAOJIRAIssues::STATUS_QA_IN_PROGRESS.'" TO
+                "'.DAOJIRAIssues::STATUS_QA_DONE.'" after -1w))
+            AND status NOT IN ("'.DAOJIRAIssues::STATUS_TO_DEVELOP.'","'.DAOJIRAIssues::STATUS_TO_QUALITY.'",
+                "'.DAOJIRAIssues::STATUS_QA_IN_PROGRESS.'","'.DAOJIRAIssues::STATUS_DEV_IN_PROGRESS.'")
+            AND type NOT IN ("'.DAOJIRAIssues::TYPE_EPIC.'")');
+        foreach ($this->walker as $issue) {
+            $issues[] = new JIRAIssue($issue);
+        }
+        return $issues;
+    }
+
     public function deleteAllPersistedIssues()
     {
         $this->daoJIRAIssues->deleteAllJIRAIssues();
