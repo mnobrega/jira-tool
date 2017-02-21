@@ -206,6 +206,15 @@ class JIRAService
     }
 
     /**
+     * @param $where
+     * @return JIRAIssueTblTuple []
+     */
+    public function getPersistedIssuesWhere($where)
+    {
+        return $this->daoJIRAIssues->searchJIRAIssuesWhere($where);
+    }
+
+    /**
      * @param $issues JIRAIssue []
      * @return Array
      */
@@ -307,6 +316,7 @@ class JIRAService
 
         return $issuesTimeSpent;
     }
+
 
     public function getTeamRoadmapData()
     {

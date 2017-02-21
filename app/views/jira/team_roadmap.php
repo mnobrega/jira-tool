@@ -1,8 +1,14 @@
 <?php
 
     require_once(DIR_SERVICES."jira_service.php");
+    require_once(DIR_SERVICES."app_service.php");
 
     $JIRAService = new JIRAService();
+    $appService = new AppService();
+
+
+
+    //die("teste2");
 
     $JIRAResourcesIssues = $JIRAService->getTeamRoadmapData();
     $JIRAVersions = $JIRAService->getVersions();
