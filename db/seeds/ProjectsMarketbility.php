@@ -59,8 +59,8 @@ class ProjectsMarketbility extends AbstractSeed
             ),
         );
 
+        $this->execute("DELETE FROM app_projects");
         $projectsTbl = $this->table('app_projects');
-        $projectsTbl->truncate();
         $projectsTbl->insert($projectsData)
             ->save();
     }

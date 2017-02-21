@@ -37,8 +37,8 @@ class PersonsMarketbility extends AbstractSeed
             )
         );
 
+        $this->execute("DELETE FROM app_persons");
         $personsTbl = $this->table('app_persons');
-        $personsTbl->truncate();
         $personsTbl->insert($data)
             ->save();
     }

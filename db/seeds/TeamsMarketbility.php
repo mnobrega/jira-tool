@@ -44,15 +44,12 @@ class TeamsMarketbility extends AbstractSeed
             ),
         );
 
+        $this->execute("DELETE FROM app_teams");
+        $this->execute("DELETE FROM app_teams_persons");
         $teamsTbl = $this->table('app_teams');
         $teamsPersonsTbl = $this->table('app_teams_persons');
-
-        $teamsPersonsTbl->truncate();
-        $teamsTbl->truncate();
-
         $teamsTbl->insert($teamsData)
             ->save();
-
         $teamsPersonsTbl->insert($teamsPersonsData)
             ->save();
     }
