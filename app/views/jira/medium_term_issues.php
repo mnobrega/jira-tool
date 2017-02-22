@@ -9,9 +9,10 @@
     );
 
     $selectedTypes = array (
-        DAOJIRAIssues::TYPE_STORY,
         DAOJIRAIssues::TYPE_BUG,
-        DAOJIRAIssues::TYPE_TASK
+        DAOJIRAIssues::TYPE_TASK,
+        DAOJIRAIssues::TYPE_PROJECT_EMPARK,
+        DAOJIRAIssues::TYPE_PROJECT_PM
     );
 
     $issues = $JIRAService->getPersistedIssues($selectedStatuses, $selectedTypes);
@@ -33,7 +34,7 @@
         <tr>
             <td><a href="http://market.kujira.premium-minds.com/browse/<?php echo $issue->getIssueKey();?>" target="_blank"><?php echo $issue->getIssueKey();?></a></td>
             <td><?php echo $issue->getIssueType();?></td>
-            <td><?php echo $issue->getPriority();?></td>
+            <td><?php echo $issue->getPriorityDetail();?></td>
             <td><?php echo $issue->getRequestor();?></td>
             <td><?php echo $issue->getSummary();?></td>
             <td><?php echo round($issue->getOriginalEstimate()/3600/8,1);?></td>

@@ -7,8 +7,16 @@
     $appService = new AppService();
 
 
+    $projects = $appService->getProjectsByTeamKey(AppService::TEAM_MARKETBILITY_KEY);
 
-    //die("teste2");
+    $projectIssues = array();
+    foreach ($projects as $project) {
+        var_dump($project);
+        $JIRAIssues = $JIRAService->getPersistedIssuesWhere($project->getIssuesAllocationCriteriaSQL());
+        var_dump($JIRAIssues);
+        die();
+    }
+
 
     $JIRAResourcesIssues = $JIRAService->getTeamRoadmapData();
     $JIRAVersions = $JIRAService->getVersions();
@@ -88,24 +96,13 @@
     $ganttWeekCategories[] = $week;
 
     //PROCESSES
-    $ganttProcesses = array(
-        array(
-            "label" => "MOB-DEV-1",
-            "id" => "MOBDEV1"
-        ),
-        array (
-            "label" => "APK-DEV-1",
-            "id" => "APKDEV1"
-        ),
-        array (
-            "label" => "QA-1",
-            "id" => "QA1"
-        ),
-        array (
-            "label" => "QA-2",
-            "id" => "QA2"
-        )
-    );
+    $ganttProcesses = array();
+    foreach($projects as $project) {
+        $ganttProcesses[] = array(
+            "label" => $project->getName(),
+            "id" => $project->getName()
+        );
+    }
 
     //JIRA ISSUES
     $ganttTasks = array();

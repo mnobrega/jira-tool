@@ -31,18 +31,22 @@ class DAOJIRAIssues extends PDOSingleton
     const TYPE_TASK = 'Task';
     const TYPE_BUG = 'Bug';
     const TYPE_SUB_TASK = 'Sub-task';
+    const TYPE_PROJECT_EMPARK = 'Project-EMP';
+    const TYPE_PROJECT_PM = 'Project-PM';
 
     public function __construct()
     {
         parent::__construct();
     }
 
-    public function searchJIRAIssuesWhere($where=null)
+    public function searchJIRAIssuesWhere($where=null, Array $statuses=null, Array $types=null)
     {
         $query = "SELECT ji.*
                     FROM ".self::TABLENAME_JIRA_ISSUES." ji
                     WHERE ji.id = ji.id
                         AND ".$where."
+                        ".(!is_null($statuses)?" AND ji.issue_status IN ".$this->inArray($statuses):"")."
+                        ".(!is_null($types)?" AND ji.issue_type IN ".$this->inArray($types):"")."
                     ORDER BY ji.priority ASC";
         return $this->getObjArray($this->query($query),"JIRAIssueTblTuple");
     }
@@ -70,7 +74,7 @@ class DAOJIRAIssues extends PDOSingleton
     {
         $query = "INSERT INTO ".self::TABLENAME_JIRA_ISSUES." (issue_key, issue_status, summary, release_summary,
             priority, issue_type, project, original_estimate, remaining_estimate, release_date, labels, assignee,
-            assignee_key, requestor, epic_name, epic_link, epic_colour)
+            assignee_key, requestor, epic_name, epic_link, epic_colour, priority_detail, project_key)
             VALUES (
                 '".$tuple->getIssueKey()."',
                 '".$tuple->getIssueStatus()."',
@@ -88,7 +92,9 @@ class DAOJIRAIssues extends PDOSingleton
                 ".(!is_null($tuple->getRequestor())?"'".$tuple->getRequestor()."'":"NULL").",
                 ".(!is_null($tuple->getEpicName())?"'".$tuple->getEpicName()."'":"NULL").",
                 ".(!is_null($tuple->getEpicLink())?"'".$tuple->getEpicLink()."'":"NULL").",
-                ".(!is_null($tuple->getEpicColour())?"'".$tuple->getEpicColour()."'":"NULL").")";
+                ".(!is_null($tuple->getEpicColour())?"'".$tuple->getEpicColour()."'":"NULL").",
+                '".$tuple->getPriorityDetail()."',
+                '".$tuple->getProjectKey()."')";
 
         $this->query($query);
     }
@@ -149,8 +155,10 @@ class JIRAIssueTblTuple
     private $summary;
     private $releaseSummary;
     private $priority;
+    private $priorityDetail;
     private $issueType;
     private $project;
+    private $projectKey;
     private $originalEstimate;
     private $remainingEstimate;
     private $releaseDate;
@@ -169,8 +177,10 @@ class JIRAIssueTblTuple
         $this->summary = $row['summary'];
         $this->releaseSummary = $row['release_summary'];
         $this->priority = $row['priority'];
+        $this->priorityDetail = $row['priority_detail'];
         $this->issueType = $row['issue_type'];
         $this->project = $row['project'];
+        $this->projectKey = $row['project_key'];
         $this->originalEstimate = $row['original_estimate'];
         $this->remainingEstimate = $row['remaining_estimate'];
         $this->releaseDate = $row['release_date'];
@@ -188,8 +198,10 @@ class JIRAIssueTblTuple
     public function getSummary() { return $this->summary;}
     public function getReleaseSummary() { return $this->releaseSummary;}
     public function getPriority() { return $this->priority;}
+    public function getPriorityDetail() {return $this->priorityDetail;}
     public function getIssueType() { return $this->issueType;}
     public function getProject() { return $this->project;}
+    public function getProjectKey() { return $this->projectKey;}
     public function getOriginalEstimate() { return $this->originalEstimate;}
     public function getRemainingEstimate() { return $this->remainingEstimate;}
     public function getReleaseDate() { return $this->releaseDate;}

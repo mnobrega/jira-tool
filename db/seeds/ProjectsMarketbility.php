@@ -16,46 +16,46 @@ class ProjectsMarketbility extends AbstractSeed
     {
         $projectsData = array(
             array(
-                'name'=>'MOB-EMP-DEV',
+                'name'=>'MOB-EPK-DEV',
                 'team_key'=>'MM',
                 'jira_project_key'=>'MOB',
                 'team_allocated_percentage'=>37.5,
-                'issues_allocation_criteria_sql'=>'project="eos Mobility" AND issue_type="Project-EMP"',
+                'issues_allocation_criteria_sql'=>'project_key="MOB" AND issue_type="Project-EPK"',
             ),
             array(
-                'name'=>'MOB-EMP-TSK',
+                'name'=>'MOB-EPK-TSK',
                 'team_key'=>'MM',
                 'jira_project_key'=>'MOB',
                 'team_allocated_percentage'=>12.5,
-                'issues_allocation_criteria_sql'=>'project="eos Mobility" AND issue_type NOT IN ("Project-EMP","Project-PM")',
+                'issues_allocation_criteria_sql'=>'project_key="MOB" AND issue_type NOT IN ("Project-EPK","Project-PM")',
             ),
             array(
                 'name'=>'MOB-PM-DEV',
                 'team_key'=>'MM',
                 'jira_project_key'=>'MOB',
                 'team_allocated_percentage'=>12.5,
-                'issues_allocation_criteria_sql'=>'project="eos Mobility" AND issue_type="Project-PM"',
+                'issues_allocation_criteria_sql'=>'project_key="MOB" AND issue_type="Project-PM"',
             ),
             array(
-                'name'=>'APK-EMP-DEV',
+                'name'=>'APK-EPK-DEV',
                 'team_key'=>'MM',
                 'jira_project_key'=>'APK',
                 'team_allocated_percentage'=>18.75,
-                'issues_allocation_criteria_sql'=>'project="eos Market" AND issue_type="Project-EMP"',
+                'issues_allocation_criteria_sql'=>'project_key="APK" AND issue_type="Project-EPK"',
             ),
             array(
-                'name'=>'APK-EMP-TSK',
+                'name'=>'APK-EPK-TSK',
                 'team_key'=>'MM',
                 'jira_project_key'=>'APK',
                 'team_allocated_percentage'=>6.25,
-                'issues_allocation_criteria_sql'=>'project="eos Market" AND issue_type NOT IN ("Project-EMP","Project-PM")',
+                'issues_allocation_criteria_sql'=>'project_key="APK" AND issue_type NOT IN ("Project-EPK","Project-PM")',
             ),
             array(
                 'name'=>'APK-PM-DEV',
                 'team_key'=>'MM',
                 'jira_project_key'=>'APK',
                 'team_allocated_percentage'=>12.5,
-                'issues_allocation_criteria_sql'=>'project="eos Market" AND issue_type="Project-PM"',
+                'issues_allocation_criteria_sql'=>'project_key="APK" AND issue_type="Project-PM"',
             ),
         );
 

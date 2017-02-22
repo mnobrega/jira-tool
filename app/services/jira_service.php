@@ -90,9 +90,13 @@ class JIRAService
         foreach (self::$projects as $projectKey=>$project) {
             $JIRAVersions[$projectKey] = array();
             $versions = $this->api->getVersions($projectKey);
-            foreach ($versions as $version) {
-                $JIRAVersions[$projectKey][] = new JIRAVersion($version);
+            if (is_array($versions))
+            {
+                foreach ($versions as $version) {
+                    $JIRAVersions[$projectKey][] = new JIRAVersion($version);
+                }
             }
+
         }
         return $JIRAVersions;
     }
@@ -209,9 +213,9 @@ class JIRAService
      * @param $where
      * @return JIRAIssueTblTuple []
      */
-    public function getPersistedIssuesWhere($where)
+    public function getPersistedIssuesWhere($where, Array $statuses=null, Array $types=null)
     {
-        return $this->daoJIRAIssues->searchJIRAIssuesWhere($where);
+        return $this->daoJIRAIssues->searchJIRAIssuesWhere($where, $statuses, $types);
     }
 
     /**
@@ -577,8 +581,11 @@ class JIRAIssue
 {
     private $issueKey;
     private $summary;
+    private $priority;
+    private $priorityDetail;
     private $issueType;
     private $project;
+    private $projectKey;
     private $originalEstimate;
     private $remainingEstimate;
     private $releaseDate;
@@ -601,8 +608,10 @@ class JIRAIssue
         $this->issueKey = $issue->getKey();
         $this->summary = $issue->getSummary();
         $this->priority = $priority['id'];
+        $this->priorityDetail = (!is_null($fields['Priority Detail'])?$fields['Priority Detail']:$priority['id']);
         $this->issueType = $fields['Issue Type']['name'];
         $this->project = $fields['Project']['name'];
+        $this->projectKey = $fields['Project']['key'];
         $this->originalEstimate = $fields['Original Estimate'];
         $this->remainingEstimate = $fields['Remaining Estimate'];
         $this->releaseDate = (count($fields['Fix Version/s'])==1 && array_key_exists('releaseDate',$fields['Fix Version/s'][0]))?
@@ -621,8 +630,10 @@ class JIRAIssue
     public function getIssueKey() { return $this->issueKey;}
     public function getSummary() { return $this->summary;}
     public function getPriority() { return $this->priority;}
+    public function getPriorityDetail() { return $this->priorityDetail;}
     public function getIssueType() { return $this->issueType;}
     public function getProject() { return $this->project;}
+    public function getProjectKey() { return $this->projectKey;}
     public function getOriginalEstimate() { return $this->originalEstimate;}
     public function getRemainingEstimate() { return $this->remainingEstimate;}
     public function getReleaseDate() { return $this->releaseDate;}

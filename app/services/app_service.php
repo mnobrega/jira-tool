@@ -16,6 +16,10 @@ class AppService
         $this->daoApp = new DAOApp();
     }
 
+    /**
+     * @param $teamKey
+     * @return Project[]
+     */
     public function getProjectsByTeamKey($teamKey)
     {
         return $this->daoApp->getTeamProjects($teamKey);
