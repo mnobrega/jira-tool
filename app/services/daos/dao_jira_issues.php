@@ -39,14 +39,13 @@ class DAOJIRAIssues extends PDOSingleton
         parent::__construct();
     }
 
-    public function searchJIRAIssuesWhere($where=null, Array $statuses=null, Array $types=null)
+    public function searchJIRAIssuesWhere($where=null, Array $statuses=null)
     {
         $query = "SELECT ji.*
                     FROM ".self::TABLENAME_JIRA_ISSUES." ji
                     WHERE ji.id = ji.id
                         AND ".$where."
                         ".(!is_null($statuses)?" AND ji.issue_status IN ".$this->inArray($statuses):"")."
-                        ".(!is_null($types)?" AND ji.issue_type IN ".$this->inArray($types):"")."
                     ORDER BY ji.priority ASC";
         return $this->getObjArray($this->query($query),"JIRAIssueTblTuple");
     }

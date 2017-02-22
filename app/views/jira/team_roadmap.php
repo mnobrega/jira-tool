@@ -7,19 +7,23 @@
     $appService = new AppService();
 
 
-    $projects = $appService->getProjectsByTeamKey(AppService::TEAM_MARKETBILITY_KEY);
+    $JIRAIssuesSelectedStatuses = array (
+        DAOJIRAIssues::STATUS_DEV_IN_PROGRESS,
+        DAOJIRAIssues::STATUS_QA_IN_PROGRESS,
+        DAOJIRAIssues::STATUS_TO_DEVELOP,
+        DAOJIRAIssues::STATUS_TO_QUALITY,
+        DAOJIRAIssues::STATUS_ANALYSED
+    );
 
+    $JIRAVersions = $JIRAService->getVersions();
+
+    $projects = $appService->getProjectsByTeamKey(AppService::TEAM_MARKETBILITY_KEY);
     $projectIssues = array();
     foreach ($projects as $project) {
-        var_dump($project);
-        $JIRAIssues = $JIRAService->getPersistedIssuesWhere($project->getIssuesAllocationCriteriaSQL());
-        var_dump($JIRAIssues);
-        die();
+        $projectIssues[$project->getName()] = $JIRAService->getPersistedIssuesWhere($project->getIssuesAllocationCriteriaSQL(),$JIRAIssuesSelectedStatuses);
+        $roadmapData = $JIRAService->getTeamRoadmapData($projectIssues[$project->getName()]);
     }
 
-
-    $JIRAResourcesIssues = $JIRAService->getTeamRoadmapData();
-    $JIRAVersions = $JIRAService->getVersions();
 
     //TIME WINDOW CONFIG
     $now = new Datetime();

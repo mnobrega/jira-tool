@@ -213,9 +213,9 @@ class JIRAService
      * @param $where
      * @return JIRAIssueTblTuple []
      */
-    public function getPersistedIssuesWhere($where, Array $statuses=null, Array $types=null)
+    public function getPersistedIssuesWhere($where, Array $statuses=null)
     {
-        return $this->daoJIRAIssues->searchJIRAIssuesWhere($where, $statuses, $types);
+        return $this->daoJIRAIssues->searchJIRAIssuesWhere($where, $statuses);
     }
 
     /**
@@ -321,9 +321,14 @@ class JIRAService
         return $issuesTimeSpent;
     }
 
-
-    public function getTeamRoadmapData()
+    /**
+     * @param JIRAIssueTblTuple []
+     * @return array
+     * @throws Exception
+     */
+    public function getTeamRoadmapData(Array $JIRAIssues)
     {
+        /*
         $selectedTypes = array(
             DAOJIRAIssues::TYPE_STORY,
             DAOJIRAIssues::TYPE_TASK,
@@ -347,6 +352,7 @@ class JIRAService
         $longTermIssuesStatus = array (
             DAOJIRAIssues::STATUS_ANALYSED
         );
+        */
 
         $fields = array(DAOJIRAIssues::HISTORY_ITEM_FIELD_STATUS);
         $fromStrings = array(DAOJIRAIssues::STATUS_DEV_IN_PROGRESS,
@@ -356,17 +362,16 @@ class JIRAService
 
         $resourcesIssues = array();
 
-        $inProgressIssues = $this->getPersistedIssues($inProgressIssueStatuses, $selectedTypes);
-        $resourcesIssuesTimeSpent = $this->getPersistedIssuesTimeSpent($inProgressIssues);
+        $resourcesIssuesTimeSpent = $this->getPersistedIssuesTimeSpent($JIRAIssues);
+
+        echo "<pre>";
+        var_dump($resourcesIssuesTimeSpent);
+        echo "</pre>";
+        die();
+
+        /*
         $this->addToResourcesIssues($resourcesIssues,$inProgressIssues);
 
-        $todoIssues = $this->getPersistedIssues($todoIssueStatuses,$selectedTypes);
-        $resourcesIssuesTimeSpent = array_merge($resourcesIssuesTimeSpent,$this->getPersistedIssuesTimeSpent($todoIssues));
-        $this->addToResourcesIssues($resourcesIssues,$todoIssues);
-
-        $longTermIssues = $this->getPersistedIssues($longTermIssuesStatus, $selectedTypes);
-        $resourcesIssuesTimeSpent = array_merge($resourcesIssuesTimeSpent,$this->getPersistedIssuesTimeSpent($longTermIssues));
-        $this->addToResourcesIssues($resourcesIssues, $longTermIssues);
 
         $epicIssuesMap = array();
         $epicIssues = $this->getPersistedIssues(null,$epicTypes);
@@ -389,7 +394,7 @@ class JIRAService
             $currentStart = null;
             foreach ($issues as $issue) {
 
-                /**@var $issue JIRAIssueTblTuple */
+                /**@var $issue JIRAIssueTblTuple
                 $workingDaysLeft = max(0.00,ceil(($issue->getOriginalEstimate()/3600 -
                         $resourcesIssuesTimeSpent[$issue->getIssueKey()])/self::WORKING_DAY_HOURS));
 
@@ -436,6 +441,7 @@ class JIRAService
         }
 
         return $JIRAGanttIssues;
+        */
     }
 
     /**
