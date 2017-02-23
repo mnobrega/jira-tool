@@ -53,6 +53,12 @@ class JIRAService
         $this->daoJIRAIssues = new DAOJIRAIssues();
     }
 
+    public function editIssuePriorityDetail($issueKey, $priorityDetail)
+    {
+        $params = array('fields'=>);
+        $this->api->editIssue($issueKey,$params);
+    }
+
     /**
      * @return Array JIRAVersion []
      */

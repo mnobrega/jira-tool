@@ -55,7 +55,7 @@
     }
     $ganttLines[] = array (
         "start" => $now->format("Y-m-d"),
-        "displayValue" => "NOW",
+        "displayValue" => "",
         "color" => "#000000",
         "thickness" => "1"
     );

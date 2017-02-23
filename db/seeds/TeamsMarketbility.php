@@ -35,13 +35,24 @@ class TeamsMarketbility extends AbstractSeed
             array(
                 'team_key'=>'MM',
                 'person_username'=>'sguerreiro',
-                'person_allocated_hours_per_day'=>2,
+                'person_allocated_hours_per_day'=>0,
             ),
             array(
                 'team_key'=>'MM',
                 'person_username'=>'lgoncalves',
                 'person_allocated_hours_per_day'=>8,
             ),
+            array(
+                'team_key'=>'MM',
+                'person_username'=>'sottaviani',
+                'person_allocated_hours_per_day'=>0,
+            ),
+            array(
+                'team_key'=>'MM',
+                'person_username'=>'mmatos',
+                'person_allocated_hours_per_day'=>0
+            )
+
         );
 
         $this->execute("DELETE FROM app_teams");
