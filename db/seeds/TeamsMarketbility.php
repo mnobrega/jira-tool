@@ -35,7 +35,7 @@ class TeamsMarketbility extends AbstractSeed
             array(
                 'team_key'=>'MM',
                 'person_username'=>'sguerreiro',
-                'person_allocated_hours_per_day'=>8,
+                'person_allocated_hours_per_day'=>2,
             ),
             array(
                 'team_key'=>'MM',

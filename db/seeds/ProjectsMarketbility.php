@@ -40,14 +40,14 @@ class ProjectsMarketbility extends AbstractSeed
                 'name'=>'APK-EPK-DEV',
                 'team_key'=>'MM',
                 'jira_project_key'=>'APK',
-                'team_allocated_percentage'=>18.75,
+                'team_allocated_percentage'=>22.5,
                 'issues_allocation_criteria_sql'=>'project_key="APK" AND issue_type="Project-EPK"',
             ),
             array(
                 'name'=>'APK-EPK-TSK',
                 'team_key'=>'MM',
                 'jira_project_key'=>'APK',
-                'team_allocated_percentage'=>6.25,
+                'team_allocated_percentage'=>2.5,
                 'issues_allocation_criteria_sql'=>'project_key="APK" AND issue_type NOT IN ("Project-EPK","Project-PM")',
             ),
             array(

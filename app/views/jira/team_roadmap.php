@@ -6,7 +6,6 @@
     $JIRAService = new JIRAService();
     $appService = new AppService();
 
-
     $JIRAIssuesSelectedStatuses = array (
         DAOJIRAIssues::STATUS_DEV_IN_PROGRESS,
         DAOJIRAIssues::STATUS_QA_IN_PROGRESS,
@@ -15,22 +14,30 @@
         DAOJIRAIssues::STATUS_ANALYSED
     );
 
-    $JIRAVersions = $JIRAService->getVersions();
-
+    $JIRAProjects = array();
+    $JIRAProjectsIssues = array();
     $projects = $appService->getProjectsByTeamKey(AppService::TEAM_MARKETBILITY_KEY);
-    $projectIssues = array();
     foreach ($projects as $project) {
-        $projectIssues[$project->getName()] = $JIRAService->getPersistedIssuesWhere($project->getIssuesAllocationCriteriaSQL(),$JIRAIssuesSelectedStatuses);
-        $roadmapData = $JIRAService->getTeamRoadmapData($projectIssues[$project->getName()]);
+        $projectIssues = $JIRAService->getPersistedIssuesWhere($project->getIssuesAllocationCriteriaSQL(),
+            $JIRAIssuesSelectedStatuses);
+        $projectTeamAllocatedTime = $appService->getProjectTeamAllocatedTime($project->getName());
+        $JIRAProjectsIssues[$project->getName()] = $JIRAService->getTeamRoadmapData($projectIssues,$project->getName(),
+            $projectTeamAllocatedTime->getTeamAllocatedHoursPerDay());
+        if (!in_array($project->getJIRAProjectKey(),$JIRAProjects)) {
+            $JIRAProjects[] = $project->getJIRAProjectKey();
+        }
     }
+    $JIRAVersions = $JIRAService->getVersions($JIRAProjects);
 
 
+/**
+ * GANTT DATA
+ */
     //TIME WINDOW CONFIG
     $now = new Datetime();
     $ganttStartMonth = $now->format("Y-m");
     $ganttMonthsNumber = 3;
     $JIRAIssueURL = "http://market.kujira.premium-minds.com/browse/";
-
     //GANT LINES
     $ganttLines = array();
     foreach ($JIRAVersions as $project=>$versions) {
@@ -52,8 +59,6 @@
         "color" => "#000000",
         "thickness" => "1"
     );
-
-    //GANTT
     $ganttStart = new DateTime($ganttStartMonth."-01 00:00:00");
     $ganttEnd = clone($ganttStart);
     $ganttEnd->modify("+".($ganttMonthsNumber-1)." months");
@@ -111,10 +116,10 @@
     //JIRA ISSUES
     $ganttTasks = array();
     $epicsDetected = array();
-    foreach ($JIRAResourcesIssues as $resource=>$issues) {
+    foreach ($JIRAProjectsIssues as $projectName=>$issues) {
         foreach ($issues as $issue) {
             /**@var $issue JIRAGanttIssue */
-            $row['processid'] = $resource;
+            $row['processid'] = $projectName;
             $row['start'] = $issue->getStart();
             $row['end'] = $issue->getEnd();
             $row['label'] = $issue->getLabel();
@@ -124,7 +129,8 @@
 
             if (!array_key_exists($issue->getEpicName(),$epicsDetected))
             {
-                $epicsDetected[$issue->getEpicName()] = array("label"=>$issue->getEpicName(),"color"=>$issue->getEpicColor());
+                $epicsDetected[$issue->getEpicName()] = array("label"=>$issue->getEpicName(),
+                    "color"=>$issue->getEpicColor());
             }
         }
     }
@@ -138,7 +144,6 @@
 
 ?>
 <div id="ganttContainerId"><!-- GANTT goes here --></div>
-
 <script>
     var dataJSON = {
         "chart": {

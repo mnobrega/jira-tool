@@ -2,7 +2,10 @@
 
 class TimeService
 {
-    static $holidays = array('2017-01-01');
+    static $holidays = array(
+        '2017-01-01',
+        '2017-02-28'
+    );
 
     public function __construct()
     {

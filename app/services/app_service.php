@@ -25,4 +25,13 @@ class AppService
         return $this->daoApp->getTeamProjects($teamKey);
     }
 
+    /**
+     * @param $projectName
+     * @return ProjectTeamAllocatedTime
+     */
+    public function getProjectTeamAllocatedTime($projectName)
+    {
+        return $this->daoApp->getProjectTeamAllocatedTime($projectName);
+    }
+
 }
