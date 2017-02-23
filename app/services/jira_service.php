@@ -332,7 +332,6 @@ class JIRAService
         $JIRAGanttIssues = array();
         $now = new DateTime();
         $currentStart = null;
-        $firstIssueRow = null;
         $JIRAIssuesOrderedByProgress = array();
         foreach ($JIRAIssues as $issue) {
             /**@var $issue JIRAIssueTblTuple */
@@ -342,7 +341,7 @@ class JIRAService
                 $JIRAIssuesOrderedByProgress[] = $issue;
             }
         }
-        foreach ($JIRAIssues as $issue) {
+        foreach ($JIRAIssuesOrderedByProgress as $issue) {
             /**@var $issue JIRAIssueTblTuple */
             $workingDaysLeft = max(0.00,ceil(($issue->getOriginalEstimate()/3600 -
                     $JIRAIssuesTimeSpent[$issue->getIssueKey()])/$workingDayHours));
@@ -363,23 +362,8 @@ class JIRAService
                     $row['workingDaysLeft']*(1+self::ISSUE_TOLERANCE_PERCENTAGE/100));
                 $endDate->modify("-1 seconds");
                 $row['end'] = $endDate->format("Y-m-d H:i:s");
-                if (!is_null($issue->getReleaseDate()))
-                {
-                    $releaseDate = new DateTime($issue->getReleaseDate()." 20:00:00");
-                    $releaseDate->modify("-".self::DELAY_DAYS_THRESHOLD." days");
-                    if ($endDate->getTimestamp()>$releaseDate->getTimestamp())
-                    {
-                        $row['epicColor'] = self::GANTT_ISSUE_COLOR_DELAYED;
-                        $row['epicName'] = "DELAYED";
-                    }
-                }
 
-                if (in_array($issue->getIssueStatus(),$inProgressIssueStatuses)) {
-                    array_unshift($JIRAGanttIssues,new JIRAGanttIssue($row));
-                    $firstIssueRow = $row;
-                } else {
-                    $JIRAGanttIssues[] = new JIRAGanttIssue($row);
-                }
+                $JIRAGanttIssues[] = new JIRAGanttIssue($row);
 
                 $currentStart = new DateTime($row['end']);
                 $currentStart->modify("+1 second");

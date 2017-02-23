@@ -16,18 +16,18 @@ class ProjectsMarketbility extends AbstractSeed
     {
         $projectsData = array(
             array(
-                'name'=>'MOB-EPK-DEV',
+                'name'=>'MOB-EMP-DEV',
                 'team_key'=>'MM',
                 'jira_project_key'=>'MOB',
                 'team_allocated_percentage'=>37.5,
-                'issues_allocation_criteria_sql'=>'project_key="MOB" AND issue_type="Project-EPK"',
+                'issues_allocation_criteria_sql'=>'project_key="MOB" AND issue_type="Project-EMP"',
             ),
             array(
-                'name'=>'MOB-EPK-TSK',
+                'name'=>'MOB-EMP-TSK',
                 'team_key'=>'MM',
                 'jira_project_key'=>'MOB',
                 'team_allocated_percentage'=>12.5,
-                'issues_allocation_criteria_sql'=>'project_key="MOB" AND issue_type NOT IN ("Project-EPK","Project-PM")',
+                'issues_allocation_criteria_sql'=>'project_key="MOB" AND issue_type NOT IN ("Project-EMP","Project-PM")',
             ),
             array(
                 'name'=>'MOB-PM-DEV',
@@ -37,18 +37,18 @@ class ProjectsMarketbility extends AbstractSeed
                 'issues_allocation_criteria_sql'=>'project_key="MOB" AND issue_type="Project-PM"',
             ),
             array(
-                'name'=>'APK-EPK-DEV',
+                'name'=>'APK-EMP-DEV',
                 'team_key'=>'MM',
                 'jira_project_key'=>'APK',
                 'team_allocated_percentage'=>22.5,
-                'issues_allocation_criteria_sql'=>'project_key="APK" AND issue_type="Project-EPK"',
+                'issues_allocation_criteria_sql'=>'project_key="APK" AND issue_type="Project-EMP"',
             ),
             array(
-                'name'=>'APK-EPK-TSK',
+                'name'=>'APK-EMP-TSK',
                 'team_key'=>'MM',
                 'jira_project_key'=>'APK',
                 'team_allocated_percentage'=>2.5,
-                'issues_allocation_criteria_sql'=>'project_key="APK" AND issue_type NOT IN ("Project-EPK","Project-PM")',
+                'issues_allocation_criteria_sql'=>'project_key="APK" AND issue_type NOT IN ("Project-EMP","Project-PM")',
             ),
             array(
                 'name'=>'APK-PM-DEV',
