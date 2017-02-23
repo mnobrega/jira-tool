@@ -389,12 +389,13 @@ class JIRAService
         }
 
         //mod first issue
-        if ((count($JIRAGanttIssues)))
+        if (count($JIRAGanttIssues))
         {
-            $issueHistories = $this->daoJIRAIssues->searchJIRAIssueHistories($firstIssueRow['issueKey'],$fields,
+            $issueHistories = $this->daoJIRAIssues->searchJIRAIssueHistories($JIRAGanttIssues[0]->getIssueKey(),$fields,
                 $fromStrings,$toStrings);
-            $firstIssueRow['start'] = $issueHistories[0]->getHistoryDatetime();
-            $JIRAGanttIssues[0] = new JIRAGanttIssue($firstIssueRow);
+            if (count($issueHistories)) {
+                $JIRAGanttIssues[0]->setStart($issueHistories[0]->getHistoryDatetime());
+            }
         }
 
         return $JIRAGanttIssues;
@@ -438,6 +439,11 @@ class JIRAGanttIssue
     public function getLabel() { return $this->label;}
     public function getEpicColor() { return $this->epicColor;}
     public function getEpicName() { return $this->epicName;}
+
+    public function setStart($start)
+    {
+        $this->start = $start;
+    }
 }
 
 class JIRAVersion
