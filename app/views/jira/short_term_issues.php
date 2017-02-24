@@ -104,7 +104,15 @@
                     "width":"3%",
                     "orderDataType":"dom-text-numeric",
                     render: function(data, type, row) {
-                        return type === 'export' ? 1 : data;
+                        var inp = $(data).find('input[type="text"]');
+                        console.log(inp.val());
+                        if (type === 'export') {
+                            var $input = $(data).find(['input[type="hidden"]']).addBack();
+                            alert($input);
+                            return $input.value;
+                        } else {
+                            return data;
+                        }
                      }
                 },
                 {"width":"48%"},
