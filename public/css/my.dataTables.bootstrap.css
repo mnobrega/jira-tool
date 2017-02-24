@@ -1,0 +1,14 @@
+.dataTables_filter {
+    text-align: right;
+    float:left;
+    margin-right:10px;
+}
+
+.btn-group, .btn-group-vertical {
+    display: inline-block;
+    position: relative;
+    vertical-align: top;
+    float: right;
+    margin-bottom:10px;
+    margin-right:5px;
+}

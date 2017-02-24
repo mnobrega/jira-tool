@@ -9,6 +9,10 @@
     <link rel="stylesheet" type="text/css" href="/css/dataTables.bootstrap.min.css">
     <link rel="stylesheet" type="text/css" href="/css/buttons.bootstrap.min.css">
 
+    <!-- override vender css -->
+    <link rel="stylesheet" type="text/css" href="/css/my.dataTables.bootstrap.css">
+    <link rel="stylesheet" type="text/css" href="/css/my.bootstrap.css">
+
     <script type="text/javascript" language="javascript" src="/js/jquery.min.js"></script>
     <script type="text/javascript" language="javascript" src="/js/bootstrap.min.js"></script>
     <script type="text/javascript" language="javascript" src="/js/jquery.dataTables.min.js"></script>

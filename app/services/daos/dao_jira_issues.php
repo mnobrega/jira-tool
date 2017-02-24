@@ -134,6 +134,14 @@ class DAOJIRAIssues extends PDOSingleton
         $this->query($query);
     }
 
+    public function updateJIRAIssue($issueKey, $priorityDetail)
+    {
+        $query = "UPDATE ".self::TABLENAME_JIRA_ISSUES." SET
+                    priority_detail='".$priorityDetail."'
+                    WHERE issue_key='".$issueKey."';";
+        $this->query($query);
+    }
+
     public function deleteAllJIRAIssues()
     {
         $query = "DELETE FROM ".self::TABLENAME_JIRA_ISSUES;

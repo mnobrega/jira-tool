@@ -55,8 +55,13 @@ class JIRAService
 
     public function editIssuePriorityDetail($issueKey, $priorityDetail)
     {
-        $params = array('fields'=>);
-        $this->api->editIssue($issueKey,$params);
+        $params = array(
+            'fields'=>array(
+                "customfield_10916" => floatval($priorityDetail)
+            )
+        );
+        debug($this->api->editIssue($issueKey,$params));
+        $this->daoJIRAIssues->updateJIRAIssue($issueKey,$priorityDetail);
     }
 
     /**
