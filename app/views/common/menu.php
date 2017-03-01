@@ -16,12 +16,13 @@
             <ul class="nav navbar-nav">
                 <li><a href="/jira/weekly_review/index.php">Weekly Review</a></li>
                 <li><a href="/jira/short_term_issues/index.php">Short Term</a></li>
-                <li><a href="/jira/team_roadmap/index.php">Ocupação Equipa (3 meses)</a>
-                <!--<li><a href="#">Releases</a></li>-->
                 <li><a href="/jira/medium_term_issues/index.php">Medium Term</a></li>
-                <!--<li><a href="#">Backlog</a></li>
-                <li><a href="#">Epics</a></li>-->
-
+                <!--<li><a href="#">Backlog</a></li>-->
+                <!--<li><a href="#">Epics</a></li>-->
+                <li><a href="/jira/team_roadmap/index.php">Roadmap</a>
+                <!--<li><a href="#">Releases</a></li>-->
+                <li><a href="/jira/empark_proyectos/index.php">Empark - Proyectos</a></li>
+                <li><a href="/jira/empark_tareas_mantenimiento/index.php">Empark - Tareas y Mantenimiento</a></li>
             </ul>
         </div><!-- /.navbar-collapse -->
     </div><!-- /.container-fluid -->
