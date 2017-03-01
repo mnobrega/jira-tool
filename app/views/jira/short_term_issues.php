@@ -62,8 +62,8 @@
                                    type="text" value="<?php echo $issue->getPriorityDetail();?>" class="form-control-priority" />
                         </td>
                         <td><?php echo $issue->getSummary();?></td>
-                        <td><?php echo round($issuesTimeSpent[$issue->getIssueKey()]/8,1);?> / <?php echo round($issue->getOriginalEstimate()/3600/8,1);?></td>
-                        <td><?php echo (round($issue->getOriginalEstimate()/3600,2)!=0?round($issuesTimeSpent[$issue->getIssueKey()]/round($issue->getOriginalEstimate()/3600,2),2)*100:0);?></td>
+                        <td><?php echo round(max($issuesTimeSpent[$issue->getIssueKey()],0)/8,1);?> / <?php echo round($issue->getOriginalEstimate()/3600/8,1);?></td>
+                        <td><?php echo (round($issue->getOriginalEstimate()/3600,2)>0?round(max($issuesTimeSpent[$issue->getIssueKey()],0)/round($issue->getOriginalEstimate()/3600,2),2)*100:0);?></td>
                         <td><?php echo $issue->getRequestor();?></td>
                     </tr>
                 <?php } ?>
@@ -80,21 +80,26 @@
         return this.api().column( col, {order:'index'} ).nodes().map( function ( td, i ) {
             return $('input', td).val() * 1;
         } );
-    }
+    };
 
     $(document).ready( function () {
         $('#tableIssuesProgressId').DataTable({
             pageLength:15,
             dom: 'Bfrtlip',
-            buttons: ['excel',{
-                text : 'Update JIRA',
-                action: function (e, dt, node, config) {
-                    if (e.type=='click') {
-                        $("#issuesForm").submit();
-                    }
+            buttons: [
+                {
+                    extend: 'excel',
+                    exportOptions: { orthogonal: 'export'}
                 },
-                exportOptions: { orthogonal: 'export'}
-            }],
+                {
+                    text : 'Update JIRA',
+                    action: function (e, dt, node, config) {
+                        if (e.type=='click') {
+                        $("#issuesForm").submit();
+                        }
+                    }
+                }
+            ],
             columns: [
                 {"width":"6%"},
                 {"width":"8%"},
@@ -104,12 +109,9 @@
                     "width":"3%",
                     "orderDataType":"dom-text-numeric",
                     render: function(data, type, row) {
-                        var inp = $(data).find('input[type="text"]');
-                        console.log(inp.val());
                         if (type === 'export') {
-                            var $input = $(data).find(['input[type="hidden"]']).addBack();
-                            alert($input);
-                            return $input.value;
+                            var priorityDetail = $(data).find('input[type="text"]').addBack();
+                            return priorityDetail.val();
                         } else {
                             return data;
                         }
