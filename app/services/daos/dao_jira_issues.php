@@ -73,7 +73,7 @@ class DAOJIRAIssues extends PDOSingleton
     {
         $query = "INSERT INTO ".self::TABLENAME_JIRA_ISSUES." (issue_key, issue_status, summary, release_summary,
             priority, issue_type, project, original_estimate, remaining_estimate, release_date, labels, assignee,
-            assignee_key, requestor, epic_name, epic_link, epic_colour, priority_detail, project_key)
+            assignee_key, emp_it_requestor, epic_name, epic_link, epic_colour, priority_detail, project_key)
             VALUES (
                 '".$tuple->getIssueKey()."',
                 '".$tuple->getIssueStatus()."',
@@ -88,7 +88,7 @@ class DAOJIRAIssues extends PDOSingleton
                 '".$tuple->getLabels()."',
                 '".$tuple->getAssignee()."',
                 '".$tuple->getAssigneeKey()."',
-                ".(!is_null($tuple->getRequestor())?"'".$tuple->getRequestor()."'":"NULL").",
+                ".(!is_null($tuple->getEMPITRequestor())?"'".$tuple->getEMPITRequestor()."'":"NULL").",
                 ".(!is_null($tuple->getEpicName())?"'".$tuple->getEpicName()."'":"NULL").",
                 ".(!is_null($tuple->getEpicLink())?"'".$tuple->getEpicLink()."'":"NULL").",
                 ".(!is_null($tuple->getEpicColour())?"'".$tuple->getEpicColour()."'":"NULL").",
@@ -160,9 +160,7 @@ class JIRAIssueTblTuple
     private $issueKey;
     private $issueStatus;
     private $summary;
-    private $releaseSummary;
     private $priority;
-    private $priorityDetail;
     private $issueType;
     private $project;
     private $projectKey;
@@ -172,19 +170,26 @@ class JIRAIssueTblTuple
     private $labels;
     private $assignee;
     private $assigneeKey;
-    private $requestor;
     private $epicName;
     private $epicLink;
     private $epicColour;
+
+    private $priorityDetail;
+    private $releaseSummary;
+    private $shortSummary;
+    private $EMPITRequestor;
+    private $EMPCustomer;
+    private $PMProjectManager;
+    private $requestDate;
+    private $PMEstimatedDate;
+
 
     public function __construct($row)
     {
         $this->issueKey = $row['issue_key'];
         $this->issueStatus = $row['issue_status'];
         $this->summary = $row['summary'];
-        $this->releaseSummary = $row['release_summary'];
         $this->priority = $row['priority'];
-        $this->priorityDetail = $row['priority_detail'];
         $this->issueType = $row['issue_type'];
         $this->project = $row['project'];
         $this->projectKey = $row['project_key'];
@@ -194,18 +199,26 @@ class JIRAIssueTblTuple
         $this->labels = $row['labels'];
         $this->assignee = $row['assignee'];
         $this->assigneeKey = $row['assignee_key'];
-        $this->requestor = $row['requestor'];
         $this->epicName = $row['epic_name'];
         $this->epicLink = $row['epic_link'];
         $this->epicColour = $row['epic_colour'];
+
+        $this->priorityDetail = $row['priority_detail'];
+        $this->releaseSummary = $row['release_summary'];
+        $this->shortSummary = $row['short_summary'];
+        $this->EMPITRequestor = $row['emp_it_requestor'];
+        $this->EMPCustomer = $row['emp_customer'];
+        $this->PMProjectManager = $row['pm_project_manager'];
+        $this->requestDate = $row['request_date'];
+        $this->PMEstimatedDate = $row['pm_estimated_date'];
+
+        var_dump($this);
     }
 
     public function getIssueKey() { return $this->issueKey;}
     public function getIssueStatus(){ return $this->issueStatus;}
     public function getSummary() { return $this->summary;}
-    public function getReleaseSummary() { return $this->releaseSummary;}
     public function getPriority() { return $this->priority;}
-    public function getPriorityDetail() {return $this->priorityDetail;}
     public function getIssueType() { return $this->issueType;}
     public function getProject() { return $this->project;}
     public function getProjectKey() { return $this->projectKey;}
@@ -215,10 +228,17 @@ class JIRAIssueTblTuple
     public function getLabels() { return $this->labels;}
     public function getAssignee() { return $this->assignee;}
     public function getAssigneeKey() { return $this->assigneeKey;}
-    public function getRequestor() { return $this->requestor;}
     public function getEpicName() { return $this->epicName;}
     public function getEpicLink() { return $this->epicLink;}
     public function getEpicColour() { return $this->epicColour;}
+
+    public function getPriorityDetail() {return $this->priorityDetail;}
+    public function getReleaseSummary() { return $this->releaseSummary;}
+    public function getEMPITRequestor() { return $this->EMPITRequestor;}
+    public function getEMPCustomer() { return $this->EMPCustomer;}
+    public function getPMProjectManager() { return $this->PMProjectManager;}
+    public function getRequestDate() { return $this->requestDate;}
+    public function getPMEstimatedDate() {return $this->PMEstimatedDate;}
 }
 
 class JIRAIssueHistoryTblTuple

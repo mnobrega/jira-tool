@@ -28,12 +28,12 @@ class IssuesTable extends AbstractMigration
     public function change()
     {
         $jiraIssuesTbl = $this->table('jira_issues');
-        $jiraIssuesTbl->addColumn('issue_key','string',array('limit'=>10))
+        $jiraIssuesTbl
+            // JIRA Native Fields
+            ->addColumn('issue_key','string',array('limit'=>10))
             ->addColumn('issue_status','string',array('limit'=>20))
             ->addColumn('summary','text')
-            ->addColumn('release_summary','text')
             ->addColumn('priority','integer')
-            ->addColumn('priority_detail','float')
             ->addColumn('issue_type','string')
             ->addColumn('project','string')
             ->addColumn('project_key','string')
@@ -43,10 +43,20 @@ class IssuesTable extends AbstractMigration
             ->addColumn('labels','text',array('null'=>true))
             ->addColumn('assignee','string',array('null'=>true))
             ->addColumn('assignee_key','string',array('null'=>true))
-            ->addColumn('requestor','string',array('null'=>true))
             ->addColumn('epic_name','string',array('null'=>true))
             ->addColumn('epic_link','string',array('null'=>true))
             ->addColumn('epic_colour','string',array('null'=>true))
+
+            //Empark Custom Fields
+            ->addColumn('release_summary','text',array('null'=>true))
+            ->addColumn('priority_detail','float',array('null'=>true))
+            ->addColumn('short_summary','text',array('null'=>true))
+            ->addColumn('emp_it_requestor','string',array('null'=>true))
+            ->addColumn('emp_customer','string',array('null'=>true))
+            ->addColumn('pm_project_manager','string',array('null'=>true))
+            ->addColumn('request_date','date',array('null'=>true))
+            ->addColumn('pm_estimated_date','date',array('null'=>true))
+
             ->addIndex(array('issue_key'),array('unique'=>true))
             ->addTimestamps()
             ->save();

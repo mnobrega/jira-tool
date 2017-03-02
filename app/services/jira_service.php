@@ -467,7 +467,6 @@ class JIRAIssue
     private $issueKey;
     private $summary;
     private $priority;
-    private $priorityDetail;
     private $issueType;
     private $project;
     private $projectKey;
@@ -477,12 +476,19 @@ class JIRAIssue
     private $labels;
     private $assignee;
     private $assigneeKey;
-    private $releaseSummary;
     private $issueStatus;
-    private $requestor;
     private $epicName;
     private $epicLink;
     private $epicColour;
+
+    private $priorityDetail;
+    private $releaseSummary;
+    private $shortSummary;
+    private $EmpITRequestor;
+    private $EmpCustomer;
+    private $PMProjectManager;
+    private $requestDate;
+    private $PMEstimatedDate;
 
     public function __construct(Jira_Issue $issue)
     {
@@ -493,7 +499,6 @@ class JIRAIssue
         $this->issueKey = $issue->getKey();
         $this->summary = $issue->getSummary();
         $this->priority = $priority['id'];
-        $this->priorityDetail = (!is_null($fields['Priority Detail'])?$fields['Priority Detail']:$priority['id']);
         $this->issueType = $fields['Issue Type']['name'];
         $this->project = $fields['Project']['name'];
         $this->projectKey = $fields['Project']['key'];
@@ -504,18 +509,24 @@ class JIRAIssue
         $this->labels = implode(',',$fields['Labels']);
         $this->assignee = $fields['Assignee']['displayName'];
         $this->assigneeKey = $fields['Assignee']['key'];
-        $this->releaseSummary = $fields['Release Summary'];
         $this->issueStatus = $status['name'];
-        $this->requestor = $fields['Requestor']['value'];
         $this->epicName = (array_key_exists('Epic Name',$fields)?$fields['Epic Name']:null);
         $this->epicLink = (array_key_exists('Epic Link',$fields)?$fields['Epic Link']:null);
         $this->epicColour = (array_key_exists('Epic Colour',$fields)?$fields['Epic Colour']:null);
+
+        $this->priorityDetail = (!is_null($fields['Priority Detail'])?$fields['Priority Detail']:$priority['id']);
+        $this->releaseSummary = $fields['Release Summary'];
+        $this->shortSummary = $fields['Short Summary'];
+        $this->EmpITRequestor = $fields['EMP IT Requestor']['value'];
+        $this->EmpCustomer = $fields['EMP Customer']['value'];
+        $this->PMProjectManager = $fields['PM Project Manager']['value'];
+        $this->requestDate = $fields['Request Date'];
+        $this->PMEstimatedDate = $fields['PM Estimated Date'];
     }
 
     public function getIssueKey() { return $this->issueKey;}
     public function getSummary() { return $this->summary;}
     public function getPriority() { return $this->priority;}
-    public function getPriorityDetail() { return $this->priorityDetail;}
     public function getIssueType() { return $this->issueType;}
     public function getProject() { return $this->project;}
     public function getProjectKey() { return $this->projectKey;}
@@ -525,12 +536,19 @@ class JIRAIssue
     public function getLabels() { return $this->labels;}
     public function getAssignee() { return $this->assignee;}
     public function getAssigneeKey() { return $this->assigneeKey;}
-    public function getReleaseSummary(){ return $this->releaseSummary;}
     public function getIssueStatus() { return $this->issueStatus;}
-    public function getRequestor() { return $this->requestor;}
     public function getEpicName() { return $this->epicName;}
     public function getEpicLink() { return $this->epicLink;}
     public function getEpicColour() { return $this->$this->epicColour;}
+
+    public function getPriorityDetail() { return $this->priorityDetail;}
+    public function getReleaseSummary(){ return $this->releaseSummary;}
+    public function getShortSummary() { return $this->shortSummary;}
+    public function getEmpITRequestor() { return $this->EmpITRequestor;}
+    public function getEmpCustomer() { return $this->EmpCustomer;}
+    public function getPMProjectManager() { return $this->PMProjectManager;}
+    public function getRequestDate() { return $this->requestDate;}
+    public function getPMEstimatedDate() { return $this->PMEstimatedDate;}
 
     public function toArray()
     {
