@@ -16,10 +16,11 @@
     );
 
     $selectedTypes = array (
-        DAOJIRAIssues::TYPE_PROJECT_EMPARK
+        DAOJIRAIssues::TYPE_STORY,
+        DAOJIRAIssues::TYPE_IMPROVEMENT
     );
 
-    $issues = $JIRAService->getPersistedIssues($selectedStatuses, $selectedTypes); //mudar para grouped by epic
+    $issues = $JIRAService->getPersistedIssues($selectedStatuses, $selectedTypes);
     $issuesTimeSpent = $JIRAService->getPersistedIssuesTimeSpent($issues);
 
     if (count($_POST)) {
@@ -62,15 +63,15 @@
                         </td>
                         <td><?php echo $issue->getPriority();?></td>
                         <td><a href="http://market.kujira.premium-minds.com/browse/<?php echo $issue->getIssueKey();?>" target="_blank"><?php echo $issue->getIssueKey();?></a></td>
+                        <td><?php echo $issue->getShortSummary();?></td>
                         <td><?php echo $issue->getSummary();?></td>
-                        <td><!-- Description --></td>
-                        <td><?php echo $issue->getRequestor();?></td>
-                        <td><!-- Project Manager --></td>
+                        <td><?php echo $issue->getEMPITRequestor();?></td>
+                        <td><?php echo $issue->getPMProjectManager();?></td>
                         <td><?php echo $issue->getProject();?></td>
                         <td><?php echo round(($issue->getOriginalEstimate()/3600)/8,2);?></td>
-                        <td><!-- Empark Customer --></td>
-                        <td><!-- Request Date --></td>
-                        <td><!-- Empark Date --></td>
+                        <td><?php echo $issue->getEMPCustomer();?></td>
+                        <td><?php echo $issue->getRequestDate();?></td>
+                        <td><?php echo $issue->getDueDate();?></td>
                         <td><?php echo $issue->getReleaseDate();?></td>
                     </tr>
                 <?php } ?>
