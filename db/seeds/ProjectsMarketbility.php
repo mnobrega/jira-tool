@@ -21,6 +21,7 @@ class ProjectsMarketbility extends AbstractSeed
                 'jira_project_key'=>'MOB',
                 'team_allocated_percentage'=>37.5,
                 'issues_allocation_criteria_sql'=>'project_key="MOB" AND issue_type NOT IN ("Task","Bug","Spike")',
+                'hidden'=>0,
             ),
             array(
                 'name'=>'MOB-EMP-TSK',
@@ -28,6 +29,7 @@ class ProjectsMarketbility extends AbstractSeed
                 'jira_project_key'=>'MOB',
                 'team_allocated_percentage'=>12.5,
                 'issues_allocation_criteria_sql'=>'project_key="MOB" AND issue_type IN ("Task","Bug","Spike")',
+                'hidden'=>0,
             ),
             array(
                 'name'=>'MOB-PM-DEV',
@@ -35,6 +37,7 @@ class ProjectsMarketbility extends AbstractSeed
                 'jira_project_key'=>'MOB',
                 'team_allocated_percentage'=>12.5,
                 'issues_allocation_criteria_sql'=>'project_key="MOB" AND emp_it_requestor IS NULL',
+                'hidden'=>1,
             ),
             array(
                 'name'=>'APK-EMP-DEV',
@@ -42,6 +45,7 @@ class ProjectsMarketbility extends AbstractSeed
                 'jira_project_key'=>'APK',
                 'team_allocated_percentage'=>17.5,
                 'issues_allocation_criteria_sql'=>'project_key="APK" AND issue_type NOT IN ("Task","Bug","Spike")',
+                'hidden'=>0,
             ),
             array(
                 'name'=>'APK-EMP-TSK',
@@ -49,6 +53,7 @@ class ProjectsMarketbility extends AbstractSeed
                 'jira_project_key'=>'APK',
                 'team_allocated_percentage'=>7.5,
                 'issues_allocation_criteria_sql'=>'project_key="APK" AND issue_type IN ("Task","Bug","Spike")',
+                'hidden'=>0,
             ),
             array(
                 'name'=>'APK-PM-DEV',
@@ -56,6 +61,7 @@ class ProjectsMarketbility extends AbstractSeed
                 'jira_project_key'=>'APK',
                 'team_allocated_percentage'=>12.5,
                 'issues_allocation_criteria_sql'=>'project_key="APK" AND emp_it_requestor IS NULL',
+                'hidden'=>1,
             ),
         );
 

@@ -17,13 +17,15 @@ class DAOApp extends PDOSingleton
 
     /**
      * @param $teamKey
+     * @param $hidden Boolean
      * @return Project[]
      */
-    public function getTeamProjects($teamKey)
+    public function getTeamProjects($teamKey, $hidden=null)
     {
         $query = "SELECT *
                     FROM ".self::TABLENAME_APP_PROJECTS." p
-                    WHERE p.team_key='".$teamKey."'";
+                    WHERE p.team_key='".$teamKey."'"
+                      .(!is_null($hidden)?" AND p.hidden=".($hidden?"TRUE":"FALSE"):"");
         return $this->getObjArray($this->query($query),"Project");
     }
 

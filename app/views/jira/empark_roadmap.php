@@ -16,7 +16,7 @@
 
     $JIRAProjects = array();
     $JIRAProjectsIssues = array();
-    $projects = $appService->getProjectsByTeamKey(AppService::TEAM_MARKETBILITY_KEY, null);
+    $projects = $appService->getProjectsByTeamKey(AppService::TEAM_MARKETBILITY_KEY, false);
     foreach ($projects as $project) {
         $projectIssues = $JIRAService->getPersistedIssuesWhere($project->getIssuesAllocationCriteriaSQL(),
             $JIRAIssuesSelectedStatuses);

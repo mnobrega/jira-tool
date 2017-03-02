@@ -18,11 +18,12 @@ class AppService
 
     /**
      * @param $teamKey
+     * @param $hidden  Boolean
      * @return Project[]
      */
-    public function getProjectsByTeamKey($teamKey)
+    public function getProjectsByTeamKey($teamKey, $hidden=null)
     {
-        return $this->daoApp->getTeamProjects($teamKey);
+        return $this->daoApp->getTeamProjects($teamKey, $hidden);
     }
 
     /**
