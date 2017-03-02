@@ -40,6 +40,7 @@ class IssuesTable extends AbstractMigration
             ->addColumn('original_estimate','integer',array('null'=>true))
             ->addColumn('remaining_estimate','integer',array('null'=>true))
             ->addColumn('release_date','date',array('null'=>true))
+            ->addColumn('due_date','date',array('null'=>true))
             ->addColumn('labels','text',array('null'=>true))
             ->addColumn('assignee','string',array('null'=>true))
             ->addColumn('assignee_key','string',array('null'=>true))

@@ -473,6 +473,7 @@ class JIRAIssue
     private $originalEstimate;
     private $remainingEstimate;
     private $releaseDate;
+    private $dueDate;
     private $labels;
     private $assignee;
     private $assigneeKey;
@@ -506,6 +507,7 @@ class JIRAIssue
         $this->remainingEstimate = $fields['Remaining Estimate'];
         $this->releaseDate = (count($fields['Fix Version/s'])==1 && array_key_exists('releaseDate',$fields['Fix Version/s'][0]))?
             $fields['Fix Version/s'][0]['releaseDate']:null;
+        $this->dueDate = $fields['Due Date'];
         $this->labels = implode(',',$fields['Labels']);
         $this->assignee = $fields['Assignee']['displayName'];
         $this->assigneeKey = $fields['Assignee']['key'];
@@ -533,6 +535,7 @@ class JIRAIssue
     public function getOriginalEstimate() { return $this->originalEstimate;}
     public function getRemainingEstimate() { return $this->remainingEstimate;}
     public function getReleaseDate() { return $this->releaseDate;}
+    public function getDueDate() { return $this->dueDate;}
     public function getLabels() { return $this->labels;}
     public function getAssignee() { return $this->assignee;}
     public function getAssigneeKey() { return $this->assigneeKey;}

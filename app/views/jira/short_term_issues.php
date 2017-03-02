@@ -16,8 +16,9 @@
     $selectedTypes = array (
         DAOJIRAIssues::TYPE_BUG,
         DAOJIRAIssues::TYPE_TASK,
-        DAOJIRAIssues::TYPE_PROJECT_EMPARK,
-        DAOJIRAIssues::TYPE_PROJECT_PM
+        DAOJIRAIssues::TYPE_STORY,
+        DAOJIRAIssues::TYPE_SPIKE,
+        DAOJIRAIssues::TYPE_IMPROVEMENT
     );
 
     $issues = $JIRAService->getPersistedIssues($selectedStatuses, $selectedTypes);
@@ -64,7 +65,7 @@
                         <td><?php echo $issue->getSummary();?></td>
                         <td><?php echo round(max($issuesTimeSpent[$issue->getIssueKey()],0)/8,1);?> / <?php echo round($issue->getOriginalEstimate()/3600/8,1);?></td>
                         <td><?php echo (round($issue->getOriginalEstimate()/3600,2)>0?round(max($issuesTimeSpent[$issue->getIssueKey()],0)/round($issue->getOriginalEstimate()/3600,2),2)*100:0);?></td>
-                        <td><?php echo $issue->getRequestor();?></td>
+                        <td><?php echo $issue->getEMPITRequestor();?></td>
                     </tr>
                 <?php } ?>
                 </tbody>

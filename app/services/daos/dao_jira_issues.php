@@ -31,8 +31,8 @@ class DAOJIRAIssues extends PDOSingleton
     const TYPE_TASK = 'Task';
     const TYPE_BUG = 'Bug';
     const TYPE_SUB_TASK = 'Sub-task';
-    const TYPE_PROJECT_EMPARK = 'Project-EMP';
-    const TYPE_PROJECT_PM = 'Project-PM';
+    const TYPE_IMPROVEMENT = 'Improvement';
+    const TYPE_SPIKE = 'Spike';
 
     public function __construct()
     {
@@ -73,7 +73,8 @@ class DAOJIRAIssues extends PDOSingleton
     {
         $query = "INSERT INTO ".self::TABLENAME_JIRA_ISSUES." (issue_key, issue_status, summary, release_summary,
             priority, issue_type, project, original_estimate, remaining_estimate, release_date, labels, assignee,
-            assignee_key, emp_it_requestor, epic_name, epic_link, epic_colour, priority_detail, project_key)
+            assignee_key, emp_it_requestor, epic_name, epic_link, epic_colour, priority_detail, project_key,
+            short_summary, emp_customer, pm_project_manager, request_date, pm_estimated_date, due_date)
             VALUES (
                 '".$tuple->getIssueKey()."',
                 '".$tuple->getIssueStatus()."',
@@ -93,7 +94,13 @@ class DAOJIRAIssues extends PDOSingleton
                 ".(!is_null($tuple->getEpicLink())?"'".$tuple->getEpicLink()."'":"NULL").",
                 ".(!is_null($tuple->getEpicColour())?"'".$tuple->getEpicColour()."'":"NULL").",
                 '".$tuple->getPriorityDetail()."',
-                '".$tuple->getProjectKey()."')";
+                '".$tuple->getProjectKey()."',
+                '".$tuple->getShortSummary()."',
+                '".$tuple->getEMPCustomer()."',
+                '".$tuple->getPMProjectManager()."',
+                ".(!is_null($tuple->getRequestDate())?"'".$tuple->getRequestDate()."'":"NULL").",
+                ".(!is_null($tuple->getPMEstimatedDate())?"'".$tuple->getPMEstimatedDate()."'":"NULL").",
+                ".(!is_null($tuple->getDueDate())?"'".$tuple->getDueDate()."'":"NULL").")";
 
         $this->query($query);
     }
@@ -167,6 +174,7 @@ class JIRAIssueTblTuple
     private $originalEstimate;
     private $remainingEstimate;
     private $releaseDate;
+    private $dueDate;
     private $labels;
     private $assignee;
     private $assigneeKey;
@@ -196,6 +204,7 @@ class JIRAIssueTblTuple
         $this->originalEstimate = $row['original_estimate'];
         $this->remainingEstimate = $row['remaining_estimate'];
         $this->releaseDate = $row['release_date'];
+        $this->dueDate = $row['due_date'];
         $this->labels = $row['labels'];
         $this->assignee = $row['assignee'];
         $this->assigneeKey = $row['assignee_key'];
@@ -211,8 +220,6 @@ class JIRAIssueTblTuple
         $this->PMProjectManager = $row['pm_project_manager'];
         $this->requestDate = $row['request_date'];
         $this->PMEstimatedDate = $row['pm_estimated_date'];
-
-        var_dump($this);
     }
 
     public function getIssueKey() { return $this->issueKey;}
@@ -225,6 +232,7 @@ class JIRAIssueTblTuple
     public function getOriginalEstimate() { return $this->originalEstimate;}
     public function getRemainingEstimate() { return $this->remainingEstimate;}
     public function getReleaseDate() { return $this->releaseDate;}
+    public function getDueDate() {return $this->dueDate;}
     public function getLabels() { return $this->labels;}
     public function getAssignee() { return $this->assignee;}
     public function getAssigneeKey() { return $this->assigneeKey;}
@@ -234,6 +242,7 @@ class JIRAIssueTblTuple
 
     public function getPriorityDetail() {return $this->priorityDetail;}
     public function getReleaseSummary() { return $this->releaseSummary;}
+    public function getShortSummary() { return $this->shortSummary;}
     public function getEMPITRequestor() { return $this->EMPITRequestor;}
     public function getEMPCustomer() { return $this->EMPCustomer;}
     public function getPMProjectManager() { return $this->PMProjectManager;}

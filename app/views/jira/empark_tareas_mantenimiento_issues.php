@@ -4,6 +4,7 @@
     $JIRAService = new JIRAService();
 
     $selectedStatuses = array(
+        DAOJIRAIssues::STATUS_RAW_REQUEST,
         DAOJIRAIssues::STATUS_ANALYSING,
         DAOJIRAIssues::STATUS_ANALYSED,
         DAOJIRAIssues::STATUS_TO_QUALITY,
@@ -37,10 +38,10 @@
             <table id="tableIssuesProgressId" class="table table-striped table-bordered table-condensed">
                 <thead>
                 <tr>
+                    <th>Status</th>
                     <th class="col-sm-1">Prio. Det.</th>
                     <th>Prioridad</th>
                     <th>JIRA Issue</th>
-                    <th>Status</th>
                     <th>Tarea</th>
                     <th>Descripción</th>
                     <th>Resp. Empark</th>
@@ -56,6 +57,7 @@
                 <tbody>
                 <?php foreach ($issues as $issue) {?>
                     <tr>
+                        <td><?php echo $issue->getIssueStatus();?></td>
                         <td>
                             <input type="hidden" id="oldPriorityDetail[<?php echo $issue->getIssueKey();?>]" name="oldPriorityDetail[<?php echo $issue->getIssueKey();?>]"
                                    value="<?php echo $issue->getPriorityDetail();?>"/>
@@ -64,17 +66,16 @@
                         </td>
                         <td><?php echo $issue->getPriority();?></td>
                         <td><a href="http://market.kujira.premium-minds.com/browse/<?php echo $issue->getIssueKey();?>" target="_blank"><?php echo $issue->getIssueKey();?></a></td>
-                        <td><?php echo $issue->getIssueStatus();?></td>
-                        <td><?php echo $issue->getSummary();?></td>
+                        <td><?php echo $issue->getShortSummary();?></td>
                         <td><!-- Description --></td>
-                        <td><?php echo $issue->getRequestor()?></td>
-                        <td><!-- PM Requestor --></td>
+                        <td><?php echo $issue->getEMPITRequestor();?></td>
+                        <td><?php echo $issue->getPMProjectManager();?></td>
                         <td><?php echo $issue->getProject();?></td>
                         <td><?php echo round(($issue->getOriginalEstimate()/3600)/8,2)==0?"n/d":round(($issue->getOriginalEstimate()/3600)/8,2);?></td>
-                        <td><!-- Empark Customer --></td>
-                        <td><!-- Request Date --></td>
-                        <td><!-- Empark Date --></td>
-                        <td><?php echo $issue->getReleaseDate();?></td>
+                        <td><?php echo $issue->getEMPCustomer();?></td>
+                        <td><?php echo $issue->getRequestDate();?></td>
+                        <td><!-- due date --></td>
+                        <td><?php echo $issue->getPMEstimatedDate();?></td>
                     </tr>
                 <?php } ?>
                 </tbody>
