@@ -60,8 +60,8 @@ class JIRAService
                 "customfield_10916" => floatval($priorityDetail)
             )
         );
-        debug($this->api->editIssue($issueKey,$params));
-        $this->daoJIRAIssues->updateJIRAIssue($issueKey,$priorityDetail);
+        $this->api->editIssue($issueKey,$params);
+        $this->daoJIRAIssues->updateJIRAIssue($issueKey,$priorityDetail, null);
     }
 
     /**
@@ -177,9 +177,21 @@ class JIRAService
      */
     public function persistIssues(Array $issues)
     {
+        $epics = array();
         foreach ($issues as $issue)
         {
             $this->daoJIRAIssues->insertJIRAIssue(new JIRAIssueTblTuple($issue->toArray()));
+            if (is_null($issue->getEpicLink())) {
+                continue;
+            }
+            if (!array_key_exists($issue->getEpicLink(),$epics)) {
+                $epics[$issue->getEpicLink()] = 0;
+            }
+            $epics[$issue->getEpicLink()] += $issue->getOriginalEstimate();
+        }
+
+        foreach ($epics as $epicIssueKey=>$originalEstimate) {
+            $this->daoJIRAIssues->updateJIRAIssue($epicIssueKey,null,$originalEstimate);
         }
     }
 

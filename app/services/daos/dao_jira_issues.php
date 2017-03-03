@@ -141,10 +141,12 @@ class DAOJIRAIssues extends PDOSingleton
         $this->query($query);
     }
 
-    public function updateJIRAIssue($issueKey, $priorityDetail)
+    public function updateJIRAIssue($issueKey, $priorityDetail=null, $originalEstimate=null)
     {
         $query = "UPDATE ".self::TABLENAME_JIRA_ISSUES." SET
-                    priority_detail='".$priorityDetail."'
+                        issue_key = issue_key,
+                        ".(!is_null($priorityDetail)?"priority_detail='".$priorityDetail."',":"")."
+                        ".(!is_null($originalEstimate)?"original_estimate='".$originalEstimate."'":"")."
                     WHERE issue_key='".$issueKey."';";
         $this->query($query);
     }
