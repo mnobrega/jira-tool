@@ -142,7 +142,8 @@ class JIRAService
     {
         $issues = array();
         $this->walker->push('created > startOfWeek(-1w) AND created< startOfWeek()
-            AND type NOT IN ("'.DAOJIRAIssues::TYPE_EPIC.'")');
+            AND type NOT IN ("'.DAOJIRAIssues::TYPE_EPIC.'")
+            ORDER BY "EMP IT Requestor" ASC');
         foreach ($this->walker as $issue) {
             $issues[] = new JIRAIssue($issue);
         }
