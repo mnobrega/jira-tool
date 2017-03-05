@@ -138,11 +138,12 @@ class JIRAService
     /**
      * @return JIRAIssue []
      */
-    public function getPreviousWeekCreatedIssues()
+    public function getPreviousWeekCreatedIssues($hasEMPITRequestor=null)
     {
         $issues = array();
         $this->walker->push('created > startOfWeek(-1w) AND created< startOfWeek()
             AND type NOT IN ("'.DAOJIRAIssues::TYPE_EPIC.'")
+            '.(!is_null($hasEMPITRequestor)?'AND "EMP IT Requestor" IS '.($hasEMPITRequestor?"NOT":"").' EMPTY':'').'
             ORDER BY "EMP IT Requestor" ASC');
         foreach ($this->walker as $issue) {
             $issues[] = new JIRAIssue($issue);
@@ -152,13 +153,14 @@ class JIRAService
     /**
      * @return JIRAIssue []
      */
-    public function getPreviousWeekStartedIssues()
+    public function getPreviousWeekStartedIssues($hasEMPITRequestor=null)
     {
         $issues = array();
         $this->walker->push('((status changed from "'.DAOJIRAIssues::STATUS_TO_DEVELOP.'" TO
                 "'.DAOJIRAIssues::STATUS_DEV_IN_PROGRESS.'" after -1w) OR
             (status changed from "'.DAOJIRAIssues::STATUS_TO_QUALITY.'" TO
                  "'.DAOJIRAIssues::STATUS_QA_IN_PROGRESS.'" after -1w))
+            '.(!is_null($hasEMPITRequestor)?'AND "EMP IT Requestor" IS '.($hasEMPITRequestor?"NOT":"").' EMPTY':'').'
             AND status NOT IN ("'.DAOJIRAIssues::STATUS_QA_DONE.'",
                 "'.DAOJIRAIssues::STATUS_DEV_DONE.'","'.DAOJIRAIssues::STATUS_READY_TO_DEPLOY.'")');
         foreach ($this->walker as $issue) {
@@ -169,13 +171,14 @@ class JIRAService
     /**
      * @return JIRAIssue []
      */
-    public function getPreviousWeekFinishedIssues()
+    public function getPreviousWeekFinishedIssues($hasEMPITRequestor=null)
     {
         $issues = array();
         $this->walker->push('((status changed from "'.DAOJIRAIssues::STATUS_DEV_IN_PROGRESS.'" TO
                 "'.DAOJIRAIssues::STATUS_DEV_DONE.'" after -1w) OR
             (status changed from "'.DAOJIRAIssues::STATUS_QA_IN_PROGRESS.'" TO
                 "'.DAOJIRAIssues::STATUS_QA_DONE.'" after -1w))
+            '.(!is_null($hasEMPITRequestor)?'AND "EMP IT Requestor" IS '.($hasEMPITRequestor?"NOT":"").' EMPTY':'').'
             AND status NOT IN ("'.DAOJIRAIssues::STATUS_TO_DEVELOP.'","'.DAOJIRAIssues::STATUS_TO_QUALITY.'",
                 "'.DAOJIRAIssues::STATUS_QA_IN_PROGRESS.'","'.DAOJIRAIssues::STATUS_DEV_IN_PROGRESS.'")
             AND type NOT IN ("'.DAOJIRAIssues::TYPE_EPIC.'")');
