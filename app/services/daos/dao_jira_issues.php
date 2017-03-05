@@ -34,22 +34,15 @@ class DAOJIRAIssues extends PDOSingleton
     const TYPE_IMPROVEMENT = 'Improvement';
     const TYPE_SPIKE = 'Spike';
 
+    const DAO_PROJECT_MOBILITY = 'MOB';
+    const DAO_PROJECT_MARKET = 'APK';
+
     public function __construct()
     {
         parent::__construct();
     }
 
-    public function searchJIRAIssuesWhere($where=null, Array $statuses=null)
-    {
-        $query = "SELECT ji.*
-                    FROM ".self::TABLENAME_JIRA_ISSUES." ji
-                    WHERE ji.id = ji.id
-                        AND ".$where."
-                        ".(!is_null($statuses)?" AND ji.issue_status IN ".$this->inArray($statuses):"")."
-                    ORDER BY ji.priority ASC";
-        return $this->getObjArray($this->query($query),"JIRAIssueTblTuple");
-    }
-
+    /** JIRAIssueTblTuples */
     /**
      * @param $statuses array
      * @param $types array
@@ -65,7 +58,6 @@ class DAOJIRAIssues extends PDOSingleton
                     ORDER BY ji.priority ASC";
         return $this->getObjArray($this->query($query),"JIRAIssueTblTuple");
     }
-
     /**
      * @param JIRAIssueTblTuple $tuple
      */
@@ -104,7 +96,22 @@ class DAOJIRAIssues extends PDOSingleton
 
         $this->query($query);
     }
+    public function updateJIRAIssue($issueKey, $priorityDetail=null, $originalEstimate=null)
+    {
+        $query = "UPDATE ".self::TABLENAME_JIRA_ISSUES." SET
+                        issue_key = issue_key
+                        ".(!is_null($priorityDetail)?" ,priority_detail='".$priorityDetail."'":"")."
+                        ".(!is_null($originalEstimate)?" ,original_estimate='".$originalEstimate."'":"")."
+                    WHERE issue_key='".$issueKey."';";
+        $this->query($query);
+    }
+    public function deleteAllJIRAIssues()
+    {
+        $query = "DELETE FROM ".self::TABLENAME_JIRA_ISSUES;
+        $this->query($query);
+    }
 
+    /** JIRAIssueHistoryTblTuples */
     /**
      * @param $issueKey
      * @param array|null $fields
@@ -125,7 +132,6 @@ class DAOJIRAIssues extends PDOSingleton
 
         return $this->getObjArray($this->query($query),"JIRAIssueHistoryTblTuple");
     }
-
     /**
      * @param JIRAIssueHistoryTblTuple $tuple
      */
@@ -140,27 +146,27 @@ class DAOJIRAIssues extends PDOSingleton
                 '".$tuple->getToString()."')";
         $this->query($query);
     }
-
-    public function updateJIRAIssue($issueKey, $priorityDetail=null, $originalEstimate=null)
-    {
-        $query = "UPDATE ".self::TABLENAME_JIRA_ISSUES." SET
-                        issue_key = issue_key,
-                        ".(!is_null($priorityDetail)?"priority_detail='".$priorityDetail."',":"")."
-                        ".(!is_null($originalEstimate)?"original_estimate='".$originalEstimate."'":"")."
-                    WHERE issue_key='".$issueKey."';";
-        $this->query($query);
-    }
-
-    public function deleteAllJIRAIssues()
-    {
-        $query = "DELETE FROM ".self::TABLENAME_JIRA_ISSUES;
-        $this->query($query);
-    }
-
     public function deleteAllJIRAIssuesHistories()
     {
         $query = "DELETE FROM ".self::TABLENAME_JIRA_ISSUES_HISTORIES;
         $this->query($query);
+    }
+
+    /** JIRAIssueTblTupleExtended */
+    public function searchJIRAIssuesWhere($where=null, Array $statuses=null)
+    {
+        $query = "SELECT * FROM
+                    (SELECT ji.*,
+                          IFNULL(epic.original_estimate,0) AS epic_original_estimate,
+                          IFNULL(epic.short_summary,'') AS epic_short_summary
+                        FROM ".self::TABLENAME_JIRA_ISSUES." ji
+                            JOIN ".self::TABLENAME_JIRA_ISSUES." epic ON epic.issue_key=ji.epic_link
+                        WHERE ji.id = ji.id
+                            ".(!is_null($statuses)?" AND ji.issue_status IN ".$this->inArray($statuses):"").") AS x
+                    WHERE x.id=x.id
+                        AND ".$where."
+                    ORDER BY x.priority ASC;";
+        return $this->getObjArray($this->query($query),"JIRAIssueTblTupleExtended");
     }
 }
 
@@ -250,6 +256,23 @@ class JIRAIssueTblTuple
     public function getPMProjectManager() { return $this->PMProjectManager;}
     public function getRequestDate() { return $this->requestDate;}
     public function getPMEstimatedDate() {return $this->PMEstimatedDate;}
+}
+
+class JIRAIssueTblTupleExtended extends JIRAIssueTblTuple
+{
+    private $epicOriginalEstimate;
+    private $epicShortSummary;
+
+    public function __construct($row)
+    {
+        parent::__construct($row);
+
+        $this->epicOriginalEstimate = $row['epic_original_estimate'];
+        $this->epicShortSummary = $row['epic_short_summary'];
+    }
+
+    public function getEpicOriginalEstimate() { return $this->epicOriginalEstimate;}
+    public function getEpicShortSummary() { return $this->epicShortSummary;}
 }
 
 class JIRAIssueHistoryTblTuple

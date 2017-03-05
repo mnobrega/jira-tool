@@ -21,39 +21,16 @@
         DAOJIRAIssues::TYPE_IMPROVEMENT
     );
 
-    $proyectoEstimateThreshold = 8*10*3600; //2 weeks
+    $selectedProjectKeys = array (
+        DAOJIRAIssues::DAO_PROJECT_MOBILITY,
+        DAOJIRAIssues::DAO_PROJECT_MARKET
+    );
 
-    $issues = $JIRAService->getPersistedIssues($selectedStatuses, $selectedTypes);
-    $epicIssues = $JIRAService->getPersistedIssues($selectedStatuses, array(DAOJIRAIssues::TYPE_EPIC));
-    $epics = array();
-    foreach ($epicIssues as $epicIssue) {
-        $epics[$epicIssue->getIssueKey()] = $epicIssue;
-    }
+    $whereSQL = "project_key IN ('".implode("','",$selectedProjectKeys)."')
+                        AND issue_type IN ('".implode("','",$selectedTypes)."')
+                        AND issue_status IN ('".implode("','",$selectedStatuses)."')
+                        AND emp_it_requestor IS NOT NULL
+                        AND epic_original_estimate >= '".JIRAService::EMPARK_PROYECTO_THRESHOLD."'";
 
-    /*
-     * BIZZ RULES
-     * 1 - Only issues that belong to epics with more than $proyectoEstimateThreshold
-     * 2 - Only iessus with Empark IT Requestor
-     */
-    $proyectoIssues = array();
-    foreach ($issues as $issue) {
-        if ($issue->getOriginalEstimate()>$proyectoEstimateThreshold ||
-            (!is_null($issue->getEpicLink()) && $epics[$issue->getEpicLink()]->getOriginalEstimate()>$proyectoEstimateThreshold)) {
-            if (!is_null($issue->getEMPITRequestor())) {
-                $proyectoIssues[] = $issue;
-            }
-        }
-    }
-
-    //$issuesTimeSpent = $JIRAService->getPersistedIssuesTimeSpent($issues);
-
-    if (count($_POST)) {
-        foreach ($_POST["newPriorityDetail"] as $key=>$value) {
-            if ($_POST["oldPriorityDetail"][$key]!==$value) {
-                $JIRAService->editIssuePriorityDetail($key,$value);
-            }
-        }
-    }
-
-    $issues = $proyectoIssues;
+    $issues = $JIRAService->getEmparkIssuesData($whereSQL);
     require_once(DIR_VIEWS."common/empark_issues_list.php");

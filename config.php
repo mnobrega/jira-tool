@@ -14,3 +14,5 @@ define('JIRA_USERNAME','mnobrega');
 define('JIRA_PASSWORD','Madeira.24404');
 
 define('INSTANCE_TIMEZONE','Europe/Lisbon');
+
+require_once(DIR_VIEWS."common/utils.php");

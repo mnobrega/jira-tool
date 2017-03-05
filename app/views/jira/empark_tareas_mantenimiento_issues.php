@@ -17,19 +17,23 @@
     );
 
     $selectedTypes = array (
+        DAOJIRAIssues::TYPE_STORY,
+        DAOJIRAIssues::TYPE_IMPROVEMENT,
+        DAOJIRAIssues::TYPE_SPIKE,
         DAOJIRAIssues::TYPE_BUG,
-        DAOJIRAIssues::TYPE_TASK,
+        DAOJIRAIssues::TYPE_TASK
     );
 
-    $issues = $JIRAService->getPersistedIssues($selectedStatuses, $selectedTypes);
-    $issuesTimeSpent = $JIRAService->getPersistedIssuesTimeSpent($issues);
+    $selectedProjectKeys = array (
+        DAOJIRAIssues::DAO_PROJECT_MOBILITY,
+        DAOJIRAIssues::DAO_PROJECT_MARKET
+    );
 
-    if (count($_POST)) {
-        foreach ($_POST["newPriorityDetail"] as $key=>$value) {
-            if ($_POST["oldPriorityDetail"][$key]!==$value) {
-                $JIRAService->editIssuePriorityDetail($key,$value);
-            }
-        }
-    }
+    $whereSQL = "project_key IN ('".implode("','",$selectedProjectKeys)."')
+                            AND issue_type IN ('".implode("','",$selectedTypes)."')
+                            AND issue_status IN ('".implode("','",$selectedStatuses)."')
+                            AND emp_it_requestor IS NOT NULL
+                            AND epic_original_estimate < '".JIRAService::EMPARK_PROYECTO_THRESHOLD."'";
 
+    $issues = $JIRAService->getEmparkIssuesData($whereSQL);
     require_once(DIR_VIEWS."common/empark_issues_list.php");

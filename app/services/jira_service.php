@@ -2,7 +2,8 @@
 
 require ROOT_DIR.'vendor/autoload.php';
 require ROOT_DIR.'app/common/converters.php';
-require ROOT_DIR.'app/services/time_service.php';
+require ROOT_DIR.'app/common/time.php';
+
 require ROOT_DIR . 'app/services/daos/dao_jira_issues.php';
 
 class JIRAServiceException extends Exception {};
@@ -20,6 +21,8 @@ class JIRAService
 
     const DELAY_DAYS_THRESHOLD = -1; //days
     const ISSUE_TOLERANCE_PERCENTAGE = 10; //%
+
+    const EMPARK_PROYECTO_THRESHOLD = 8*10*3600; //2 weeks
 
     static $projects = array (
         "APK"=>"eos Market",
@@ -40,7 +43,6 @@ class JIRAService
 
     private $api;
     private $walker;
-    private $timeService;
 
     private $daoJIRAIssues;
 
@@ -48,7 +50,6 @@ class JIRAService
     {
         $this->api = new \Jira_Api(JIRA_URL, new \Jira_Api_Authentication_Basic(JIRA_USERNAME, JIRA_PASSWORD));
         $this->walker = new Jira_Issues_Walker($this->api);
-        $this->timeService = new TimeService();
 
         $this->daoJIRAIssues = new DAOJIRAIssues();
     }
@@ -113,57 +114,6 @@ class JIRAService
             $issues[] = new JIRAIssue($issue);
         }
 
-        return $issues;
-    }
-
-    /**
-     * @return JIRAIssue []
-     */
-    public function getPreviousWeekCreatedIssues()
-    {
-        $issues = array();
-        $this->walker->push('created > startOfWeek(-1w) AND created< startOfWeek()
-            AND type NOT IN ("'.DAOJIRAIssues::TYPE_EPIC.'")');
-        foreach ($this->walker as $issue) {
-            $issues[] = new JIRAIssue($issue);
-        }
-        return $issues;
-    }
-
-    /**
-     * @return JIRAIssue []
-     */
-    public function getPreviousWeekStartedIssues()
-    {
-        $issues = array();
-        $this->walker->push('((status changed from "'.DAOJIRAIssues::STATUS_TO_DEVELOP.'" TO
-                "'.DAOJIRAIssues::STATUS_DEV_IN_PROGRESS.'" after -1w) OR
-            (status changed from "'.DAOJIRAIssues::STATUS_TO_QUALITY.'" TO
-                 "'.DAOJIRAIssues::STATUS_QA_IN_PROGRESS.'" after -1w))
-            AND status NOT IN ("'.DAOJIRAIssues::STATUS_QA_DONE.'",
-                "'.DAOJIRAIssues::STATUS_DEV_DONE.'","'.DAOJIRAIssues::STATUS_READY_TO_DEPLOY.'")');
-        foreach ($this->walker as $issue) {
-            $issues[] = new JIRAIssue($issue);
-        }
-        return $issues;
-    }
-
-    /**
-     * @return JIRAIssue []
-     */
-    public function getPreviousWeekFinishedIssues()
-    {
-        $issues = array();
-        $this->walker->push('((status changed from "'.DAOJIRAIssues::STATUS_DEV_IN_PROGRESS.'" TO
-                "'.DAOJIRAIssues::STATUS_DEV_DONE.'" after -1w) OR
-            (status changed from "'.DAOJIRAIssues::STATUS_QA_IN_PROGRESS.'" TO
-                "'.DAOJIRAIssues::STATUS_QA_DONE.'" after -1w))
-            AND status NOT IN ("'.DAOJIRAIssues::STATUS_TO_DEVELOP.'","'.DAOJIRAIssues::STATUS_TO_QUALITY.'",
-                "'.DAOJIRAIssues::STATUS_QA_IN_PROGRESS.'","'.DAOJIRAIssues::STATUS_DEV_IN_PROGRESS.'")
-            AND type NOT IN ("'.DAOJIRAIssues::TYPE_EPIC.'")');
-        foreach ($this->walker as $issue) {
-            $issues[] = new JIRAIssue($issue);
-        }
         return $issues;
     }
 
@@ -310,10 +260,73 @@ class JIRAService
                 $timeIntervals[] = $timeInterval;
             }
 
-            $issuesTimeSpent[$issue->getIssueKey()] = $this->timeService->getWorkingHours($timeIntervals);
+            $issuesTimeSpent[$issue->getIssueKey()] = getWorkingHours($timeIntervals);
         }
 
         return $issuesTimeSpent;
+    }
+
+
+
+    /**** SPECIFIC METHODS *****/
+    /**** SPECIFIC METHODS *****/
+    /**** SPECIFIC METHODS *****/
+    /**** SPECIFIC METHODS *****/
+
+
+    /**
+     * @return JIRAIssue []
+     */
+    public function getPreviousWeekCreatedIssues()
+    {
+        $issues = array();
+        $this->walker->push('created > startOfWeek(-1w) AND created< startOfWeek()
+            AND type NOT IN ("'.DAOJIRAIssues::TYPE_EPIC.'")');
+        foreach ($this->walker as $issue) {
+            $issues[] = new JIRAIssue($issue);
+        }
+        return $issues;
+    }
+
+    /**
+     * @return JIRAIssue []
+     */
+    public function getPreviousWeekStartedIssues()
+    {
+        $issues = array();
+        $this->walker->push('((status changed from "'.DAOJIRAIssues::STATUS_TO_DEVELOP.'" TO
+                "'.DAOJIRAIssues::STATUS_DEV_IN_PROGRESS.'" after -1w) OR
+            (status changed from "'.DAOJIRAIssues::STATUS_TO_QUALITY.'" TO
+                 "'.DAOJIRAIssues::STATUS_QA_IN_PROGRESS.'" after -1w))
+            AND status NOT IN ("'.DAOJIRAIssues::STATUS_QA_DONE.'",
+                "'.DAOJIRAIssues::STATUS_DEV_DONE.'","'.DAOJIRAIssues::STATUS_READY_TO_DEPLOY.'")');
+        foreach ($this->walker as $issue) {
+            $issues[] = new JIRAIssue($issue);
+        }
+        return $issues;
+    }
+
+    /**
+     * @return JIRAIssue []
+     */
+    public function getPreviousWeekFinishedIssues()
+    {
+        $issues = array();
+        $this->walker->push('((status changed from "'.DAOJIRAIssues::STATUS_DEV_IN_PROGRESS.'" TO
+                "'.DAOJIRAIssues::STATUS_DEV_DONE.'" after -1w) OR
+            (status changed from "'.DAOJIRAIssues::STATUS_QA_IN_PROGRESS.'" TO
+                "'.DAOJIRAIssues::STATUS_QA_DONE.'" after -1w))
+            AND status NOT IN ("'.DAOJIRAIssues::STATUS_TO_DEVELOP.'","'.DAOJIRAIssues::STATUS_TO_QUALITY.'",
+                "'.DAOJIRAIssues::STATUS_QA_IN_PROGRESS.'","'.DAOJIRAIssues::STATUS_DEV_IN_PROGRESS.'")
+            AND type NOT IN ("'.DAOJIRAIssues::TYPE_EPIC.'")');
+        foreach ($this->walker as $issue) {
+            $issues[] = new JIRAIssue($issue);
+        }
+        return $issues;
+    }
+    public function getEmparkIssuesData($whereSQL)
+    {
+        return $this->daoJIRAIssues->searchJIRAIssuesWhere($whereSQL);
     }
 
     /**
@@ -381,7 +394,7 @@ class JIRAService
                     self::DEFAULT_GANTT_ISSUE_COLOR);
                 $row['epicName'] = (!is_null($issue->getEpicLink())?$epicIssuesMap[$issue->getEpicLink()]['name']:"Outros");
                 $row['start'] = (is_null($currentStart)?$now->format("Y-m-d 00:00:00"):$currentStart->format("Y-m-d H:i:s"));
-                $endDate = $this->timeService->getEndDateFromWorkingHours(new DateTime($row['start']),
+                $endDate = getEndDateFromWorkingHours(new DateTime($row['start']),
                     $row['workingDaysLeft']*(1+self::ISSUE_TOLERANCE_PERCENTAGE/100));
                 $endDate->modify("-1 seconds");
                 $row['end'] = $endDate->format("Y-m-d H:i:s");
