@@ -68,7 +68,6 @@ class Project
     private $teamKey;
     private $JIRAProjectKey;
     private $teamAllocatedPercentage;
-    private $issuesAllocationCriteriaSQL;
 
     public function __construct($row)
     {
@@ -76,13 +75,11 @@ class Project
         $this->teamKey = $row['team_key'];
         $this->JIRAProjectKey = $row['jira_project_key'];
         $this->teamAllocatedPercentage = $row['team_allocated_percentage'];
-        $this->issuesAllocationCriteriaSQL = $row['issues_allocation_criteria_sql'];
     }
 
     public function getName() { return $this->name;}
     public function getTeamKey() { return $this->teamKey;}
     public function getJIRAProjectKey() { return $this->JIRAProjectKey;}
     public function getTeamAllocatedPercentage() { return $this->teamAllocatedPercentage;}
-    public function getIssuesAllocationCriteriaSQL() {return $this->issuesAllocationCriteriaSQL;}
 
 }

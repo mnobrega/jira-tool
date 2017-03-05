@@ -56,7 +56,9 @@ class IssuesTable extends AbstractMigration
             ->addColumn('emp_customer','string',array('null'=>true))
             ->addColumn('pm_project_manager','string',array('null'=>true))
             ->addColumn('request_date','date',array('null'=>true))
-            ->addColumn('pm_estimated_date','date',array('null'=>true))
+            ->addColumn('estimated_start_date','datetime',array('null'=>true))
+            ->addColumn('estimated_end_date','datetime',array('null'=>true))
+            ->addColumn('pm_project_name','string',array('null'=>false))
 
             ->addIndex(array('issue_key'),array('unique'=>true))
             ->addTimestamps()

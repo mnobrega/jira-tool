@@ -54,17 +54,7 @@ class JIRAService
         $this->daoJIRAIssues = new DAOJIRAIssues();
     }
 
-    public function editIssuePriorityDetail($issueKey, $priorityDetail)
-    {
-        $params = array(
-            'fields'=>array(
-                "customfield_10916" => floatval($priorityDetail)
-            )
-        );
-        $this->api->editIssue($issueKey,$params);
-        $this->daoJIRAIssues->updateJIRAIssue($issueKey,$priorityDetail, null);
-    }
-
+    /*** JIRA CLIENT ***/
     /**
      * @return Array JIRAVersion []
      */
@@ -84,7 +74,6 @@ class JIRAService
         }
         return $JIRAVersions;
     }
-
     /**
      * @param array $status
      * @return JIRAIssue []
@@ -102,7 +91,6 @@ class JIRAService
 
         return $issues;
     }
-
     public function getIssuesByTypes(Array $types)
     {
         $issues = array();
@@ -116,53 +104,6 @@ class JIRAService
 
         return $issues;
     }
-
-    public function deleteAllPersistedIssues()
-    {
-        $this->daoJIRAIssues->deleteAllJIRAIssues();
-    }
-
-    /**
-     * @param $issues JIRAIssue []
-     */
-    public function persistIssues(Array $issues)
-    {
-        $epics = array();
-        foreach ($issues as $issue)
-        {
-            $this->daoJIRAIssues->insertJIRAIssue(new JIRAIssueTblTuple($issue->toArray()));
-            if (is_null($issue->getEpicLink())) {
-                continue;
-            }
-            if (!array_key_exists($issue->getEpicLink(),$epics)) {
-                $epics[$issue->getEpicLink()] = 0;
-            }
-            $epics[$issue->getEpicLink()] += $issue->getOriginalEstimate();
-        }
-
-        foreach ($epics as $epicIssueKey=>$originalEstimate) {
-            $this->daoJIRAIssues->updateJIRAIssue($epicIssueKey,null,$originalEstimate);
-        }
-    }
-
-    /**
-     * @param array|null $statuses
-     * @return JIRAIssueTblTuple []
-     */
-    public function getPersistedIssues(Array $statuses=null, Array $types=null)
-    {
-        return $this->daoJIRAIssues->searchJIRAIssues($statuses, $types);
-    }
-
-    /**
-     * @param $where
-     * @return JIRAIssueTblTuple []
-     */
-    public function getPersistedIssuesWhere($where, Array $statuses=null)
-    {
-        return $this->daoJIRAIssues->searchJIRAIssuesWhere($where, $statuses);
-    }
-
     /**
      * @param $issues JIRAIssue []
      * @return Array
@@ -194,7 +135,99 @@ class JIRAService
 
         return $issuesHistories;
     }
+    /**
+     * @return JIRAIssue []
+     */
+    public function getPreviousWeekCreatedIssues()
+    {
+        $issues = array();
+        $this->walker->push('created > startOfWeek(-1w) AND created< startOfWeek()
+            AND type NOT IN ("'.DAOJIRAIssues::TYPE_EPIC.'")');
+        foreach ($this->walker as $issue) {
+            $issues[] = new JIRAIssue($issue);
+        }
+        return $issues;
+    }
+    /**
+     * @return JIRAIssue []
+     */
+    public function getPreviousWeekStartedIssues()
+    {
+        $issues = array();
+        $this->walker->push('((status changed from "'.DAOJIRAIssues::STATUS_TO_DEVELOP.'" TO
+                "'.DAOJIRAIssues::STATUS_DEV_IN_PROGRESS.'" after -1w) OR
+            (status changed from "'.DAOJIRAIssues::STATUS_TO_QUALITY.'" TO
+                 "'.DAOJIRAIssues::STATUS_QA_IN_PROGRESS.'" after -1w))
+            AND status NOT IN ("'.DAOJIRAIssues::STATUS_QA_DONE.'",
+                "'.DAOJIRAIssues::STATUS_DEV_DONE.'","'.DAOJIRAIssues::STATUS_READY_TO_DEPLOY.'")');
+        foreach ($this->walker as $issue) {
+            $issues[] = new JIRAIssue($issue);
+        }
+        return $issues;
+    }
+    /**
+     * @return JIRAIssue []
+     */
+    public function getPreviousWeekFinishedIssues()
+    {
+        $issues = array();
+        $this->walker->push('((status changed from "'.DAOJIRAIssues::STATUS_DEV_IN_PROGRESS.'" TO
+                "'.DAOJIRAIssues::STATUS_DEV_DONE.'" after -1w) OR
+            (status changed from "'.DAOJIRAIssues::STATUS_QA_IN_PROGRESS.'" TO
+                "'.DAOJIRAIssues::STATUS_QA_DONE.'" after -1w))
+            AND status NOT IN ("'.DAOJIRAIssues::STATUS_TO_DEVELOP.'","'.DAOJIRAIssues::STATUS_TO_QUALITY.'",
+                "'.DAOJIRAIssues::STATUS_QA_IN_PROGRESS.'","'.DAOJIRAIssues::STATUS_DEV_IN_PROGRESS.'")
+            AND type NOT IN ("'.DAOJIRAIssues::TYPE_EPIC.'")');
+        foreach ($this->walker as $issue) {
+            $issues[] = new JIRAIssue($issue);
+        }
+        return $issues;
+    }
 
+
+    /*** JIRA PERSISTED ***/
+    public function deleteAllPersistedIssues()
+    {
+        $this->daoJIRAIssues->deleteAllJIRAIssues();
+    }
+    /**
+     * @param $issues JIRAIssue []
+     */
+    public function persistIssues(Array $issues)
+    {
+        $epics = array();
+        foreach ($issues as $issue)
+        {
+            $this->daoJIRAIssues->insertJIRAIssue(new JIRAIssueTblTuple($issue->toArray()));
+            if (is_null($issue->getEpicLink())) {
+                continue;
+            }
+            if (!array_key_exists($issue->getEpicLink(),$epics)) {
+                $epics[$issue->getEpicLink()] = 0;
+            }
+            $epics[$issue->getEpicLink()] += $issue->getOriginalEstimate();
+        }
+
+        foreach ($epics as $epicIssueKey=>$originalEstimate) {
+            $this->daoJIRAIssues->updateJIRAIssueOriginalEstimate($epicIssueKey,$originalEstimate);
+        }
+    }
+    /**
+     * @param array|null $statuses
+     * @return JIRAIssueTblTuple []
+     */
+    public function getPersistedIssues(Array $statuses=null, Array $types=null)
+    {
+        return $this->daoJIRAIssues->searchJIRAIssues($statuses, $types);
+    }
+    /**
+     * @param $where
+     * @return JIRAIssueTblTuple []
+     */
+    public function getPersistedIssuesWhere($where, Array $statuses=null)
+    {
+        return $this->daoJIRAIssues->searchJIRAIssuesWhere($where, $statuses);
+    }
     public function persistIssuesHistories(Array $issuesHistories)
     {
         $this->daoJIRAIssues->deleteAllJIRAIssuesHistories();
@@ -214,7 +247,6 @@ class JIRAService
             }
         }
     }
-
     /**
      * @param $issues JIRAIssue []
      * @return Array
@@ -267,76 +299,23 @@ class JIRAService
     }
 
 
-
     /**** SPECIFIC METHODS *****/
     /**** SPECIFIC METHODS *****/
     /**** SPECIFIC METHODS *****/
     /**** SPECIFIC METHODS *****/
-
-
-    /**
-     * @return JIRAIssue []
-     */
-    public function getPreviousWeekCreatedIssues()
+    public function getPersistedIssuesByPMProjectName($PMProjectName, $orderBy=null)
     {
-        $issues = array();
-        $this->walker->push('created > startOfWeek(-1w) AND created< startOfWeek()
-            AND type NOT IN ("'.DAOJIRAIssues::TYPE_EPIC.'")');
-        foreach ($this->walker as $issue) {
-            $issues[] = new JIRAIssue($issue);
-        }
-        return $issues;
-    }
-
-    /**
-     * @return JIRAIssue []
-     */
-    public function getPreviousWeekStartedIssues()
-    {
-        $issues = array();
-        $this->walker->push('((status changed from "'.DAOJIRAIssues::STATUS_TO_DEVELOP.'" TO
-                "'.DAOJIRAIssues::STATUS_DEV_IN_PROGRESS.'" after -1w) OR
-            (status changed from "'.DAOJIRAIssues::STATUS_TO_QUALITY.'" TO
-                 "'.DAOJIRAIssues::STATUS_QA_IN_PROGRESS.'" after -1w))
-            AND status NOT IN ("'.DAOJIRAIssues::STATUS_QA_DONE.'",
-                "'.DAOJIRAIssues::STATUS_DEV_DONE.'","'.DAOJIRAIssues::STATUS_READY_TO_DEPLOY.'")');
-        foreach ($this->walker as $issue) {
-            $issues[] = new JIRAIssue($issue);
-        }
-        return $issues;
-    }
-
-    /**
-     * @return JIRAIssue []
-     */
-    public function getPreviousWeekFinishedIssues()
-    {
-        $issues = array();
-        $this->walker->push('((status changed from "'.DAOJIRAIssues::STATUS_DEV_IN_PROGRESS.'" TO
-                "'.DAOJIRAIssues::STATUS_DEV_DONE.'" after -1w) OR
-            (status changed from "'.DAOJIRAIssues::STATUS_QA_IN_PROGRESS.'" TO
-                "'.DAOJIRAIssues::STATUS_QA_DONE.'" after -1w))
-            AND status NOT IN ("'.DAOJIRAIssues::STATUS_TO_DEVELOP.'","'.DAOJIRAIssues::STATUS_TO_QUALITY.'",
-                "'.DAOJIRAIssues::STATUS_QA_IN_PROGRESS.'","'.DAOJIRAIssues::STATUS_DEV_IN_PROGRESS.'")
-            AND type NOT IN ("'.DAOJIRAIssues::TYPE_EPIC.'")');
-        foreach ($this->walker as $issue) {
-            $issues[] = new JIRAIssue($issue);
-        }
-        return $issues;
+        return $this->daoJIRAIssues->searchJIRAIssuesByPMProjectName($PMProjectName,$orderBy);
     }
     public function getEmparkIssuesData($whereSQL)
     {
         return $this->daoJIRAIssues->searchJIRAIssuesWhere($whereSQL);
     }
-
     /**
-     * @param JIRAIssueTblTuple []
-     * @param $resourceName
-     * @param $workingDayHours
-     * @return array
-     * @throws Exception
+     * @param Project $PMProject
+     * @param float $workingDayHours
      */
-    public function getTeamRoadmapData(Array $JIRAIssues, $resourceName, $workingDayHours)
+    public function updatePMProjectsEstimatedDates($PMProject, $workingDayHours)
     {
         $inProgressIssueStatuses = array(
             DAOJIRAIssues::STATUS_DEV_IN_PROGRESS,
@@ -349,9 +328,63 @@ class JIRAService
         $toStrings = array(DAOJIRAIssues::STATUS_DEV_IN_PROGRESS,
             DAOJIRAIssues::STATUS_QA_IN_PROGRESS);
 
+        $projectIssues = $this->getPersistedIssuesByPMProjectName($PMProject->getName(),null);
+        $JIRAIssuesTimeSpent = $this->getPersistedIssuesTimeSpent($projectIssues);
 
-        $JIRAIssuesTimeSpent = $this->getPersistedIssuesTimeSpent($JIRAIssues);
+        $JIRAIssuesOrderedByProgress = array();
+        foreach ($projectIssues as $issue) {
+            /**@var $issue JIRAIssueTblTuple */
+            if (in_array($issue->getIssueStatus(),$inProgressIssueStatuses)) {
+                array_unshift($JIRAIssuesOrderedByProgress,$issue);
+            } else {
+                $JIRAIssuesOrderedByProgress[] = $issue;
+            }
+        }
 
+        $currentStart = null;
+        $now = new DateTime();
+        foreach ($JIRAIssuesOrderedByProgress as $issue) {
+            /**@var $issue JIRAIssueTblTuple */
+            $workingDaysLeft = max(0.00,ceil(($issue->getOriginalEstimate()/3600 -
+                    $JIRAIssuesTimeSpent[$issue->getIssueKey()])/$workingDayHours));
+
+            if ($workingDaysLeft>0) {
+                $start = (is_null($currentStart)?$now->format("Y-m-d 00:00:00"):$currentStart->format("Y-m-d H:i:s"));
+                $endDate = getEndDateFromWorkingHours(new DateTime($start),
+                    $workingDaysLeft*(1+self::ISSUE_TOLERANCE_PERCENTAGE/100));
+                $endDate->modify("-1 seconds");
+                $end = $endDate->format("Y-m-d H:i:s");
+
+                $this->editIssueDateEstimates($issue->getIssueKey(),$start,$end);
+
+                $currentStart = new DateTime($end);
+                $currentStart->modify("+1 second");
+            } else {
+                //ignore issue
+            }
+        }
+
+        if (count($JIRAIssuesOrderedByProgress))
+        {
+            $issueHistories = $this->daoJIRAIssues->searchJIRAIssueHistories($JIRAIssuesOrderedByProgress[0]->getIssueKey(),$fields,
+                $fromStrings,$toStrings);
+            if (count($issueHistories)) {
+                $issue = $this->daoJIRAIssues->getJIRAIssueByKey($JIRAIssuesOrderedByProgress[0]->getIssueKey());
+                $this->editIssueDateEstimates($JIRAIssuesOrderedByProgress[0]->getIssueKey(),
+                    $issueHistories[0]->getHistoryDatetime(),$issue->getEstimatedEndDate());
+            }
+        }
+
+    }
+    /**
+     * @param JIRAIssueTblTuple []
+     * @param $resourceName
+     * @param $workingDayHours
+     * @return array
+     * @throws Exception
+     */
+    public function getTeamRoadmapData(Array $JIRAIssues, $resourceName, $workingHours)
+    {
         $epicIssuesMap = array();
         $epicIssues = $this->getPersistedIssues(null,array(DAOJIRAIssues::TYPE_EPIC));
         foreach ($epicIssues as $epicIssue)
@@ -368,19 +401,11 @@ class JIRAService
         $JIRAGanttIssues = array();
         $now = new DateTime();
         $currentStart = null;
-        $JIRAIssuesOrderedByProgress = array();
+        $JIRAIssuesTimeSpent = $this->getPersistedIssuesTimeSpent($JIRAIssues);
         foreach ($JIRAIssues as $issue) {
             /**@var $issue JIRAIssueTblTuple */
-            if (in_array($issue->getIssueStatus(),$inProgressIssueStatuses)) {
-                array_unshift($JIRAIssuesOrderedByProgress,$issue);
-            } else {
-                $JIRAIssuesOrderedByProgress[] = $issue;
-            }
-        }
-        foreach ($JIRAIssuesOrderedByProgress as $issue) {
-            /**@var $issue JIRAIssueTblTuple */
             $workingDaysLeft = max(0.00,ceil(($issue->getOriginalEstimate()/3600 -
-                    $JIRAIssuesTimeSpent[$issue->getIssueKey()])/$workingDayHours));
+                    $JIRAIssuesTimeSpent[$issue->getIssueKey()])/$workingHours));
 
             if ($workingDaysLeft>0) {
                 $row = array();
@@ -393,32 +418,40 @@ class JIRAService
                 $row['epicColor'] = (!is_null($issue->getEpicLink())?$epicIssuesMap[$issue->getEpicLink()]['color']:
                     self::DEFAULT_GANTT_ISSUE_COLOR);
                 $row['epicName'] = (!is_null($issue->getEpicLink())?$epicIssuesMap[$issue->getEpicLink()]['name']:"Outros");
-                $row['start'] = (is_null($currentStart)?$now->format("Y-m-d 00:00:00"):$currentStart->format("Y-m-d H:i:s"));
-                $endDate = getEndDateFromWorkingHours(new DateTime($row['start']),
-                    $row['workingDaysLeft']*(1+self::ISSUE_TOLERANCE_PERCENTAGE/100));
-                $endDate->modify("-1 seconds");
-                $row['end'] = $endDate->format("Y-m-d H:i:s");
+                $row['start'] = $issue->getEstimatedStartDate();
+                $row['end'] = $issue->getEstimatedEndDate();
 
                 $JIRAGanttIssues[] = new JIRAGanttIssue($row);
-
-                $currentStart = new DateTime($row['end']);
-                $currentStart->modify("+1 second");
             } else {
                 //ignore issue
             }
         }
 
-        //mod first issue
-        if (count($JIRAGanttIssues))
-        {
-            $issueHistories = $this->daoJIRAIssues->searchJIRAIssueHistories($JIRAGanttIssues[0]->getIssueKey(),$fields,
-                $fromStrings,$toStrings);
-            if (count($issueHistories)) {
-                $JIRAGanttIssues[0]->setStart($issueHistories[0]->getHistoryDatetime());
-            }
-        }
-
         return $JIRAGanttIssues;
+    }
+    public function editIssuePriorityDetail($issueKey, $priorityDetail)
+    {
+        $params = array(
+            'fields'=>array(
+                "customfield_10916" => floatval($priorityDetail)
+            )
+        );
+        $this->api->editIssue($issueKey,$params);
+        $this->daoJIRAIssues->updateJIRAIssuePriorityDetail($issueKey,$priorityDetail);
+    }
+    public function editIssueDateEstimates($issueKey, $estimatedStartDate, $estimatedEndDate)
+    {
+        $start = new DateTime($estimatedStartDate, new DateTimeZone(INSTANCE_TIMEZONE));
+        $end = new DateTime($estimatedEndDate,new DateTimeZone(INSTANCE_TIMEZONE));
+
+        $params = array (
+            'fields'=>array(
+                "customfield_10927" => $start->format("Y-m-d\TH:i:s.0TZ"),
+                "customfield_10928" => $end->format("Y-m-d\TH:i:s.0TZ"),
+            )
+        );
+        $this->api->editIssue($issueKey,$params);
+        $this->daoJIRAIssues->updateJIRAIssueDateEstimates($issueKey,$estimatedStartDate,$estimatedEndDate);
     }
 }
 
@@ -514,7 +547,9 @@ class JIRAIssue
     private $EmpCustomer;
     private $PMProjectManager;
     private $requestDate;
-    private $PMEstimatedDate;
+    private $estimatedStartDate;
+    private $estimatedEndDate;
+    private $PMProjectName;
 
     public function __construct(Jira_Issue $issue)
     {
@@ -541,6 +576,9 @@ class JIRAIssue
         $this->epicLink = (array_key_exists('Epic Link',$fields)?$fields['Epic Link']:null);
         $this->epicColour = (array_key_exists('Epic Colour',$fields)?$fields['Epic Colour']:null);
 
+
+        $estimatedStartDate = new DateTime($fields['Estimated Start Date'], new DateTimeZone(INSTANCE_TIMEZONE));
+        $estimatedEndDate = new DateTime($fields['Estimated End Date'], new DateTimeZone(INSTANCE_TIMEZONE));
         $this->priorityDetail = (!is_null($fields['Priority Detail'])?$fields['Priority Detail']:$priority['id']);
         $this->releaseSummary = $fields['Release Summary (ES)'];
         $this->shortSummary = $fields['Short Summary (ES)'];
@@ -548,7 +586,9 @@ class JIRAIssue
         $this->EmpCustomer = $fields['EMP Customer']['value'];
         $this->PMProjectManager = $fields['PM Project Manager']['value'];
         $this->requestDate = $fields['Request Date'];
-        $this->PMEstimatedDate = $fields['PM Estimated Date'];
+        $this->estimatedStartDate = $estimatedStartDate->format("Y-m-d H:i:s");
+        $this->estimatedEndDate = $estimatedEndDate->format("Y-m-d H:i:s");
+        $this->PMProjectName = $fields['PM Project Name']['value'];
     }
 
     public function getIssueKey() { return $this->issueKey;}
@@ -576,7 +616,9 @@ class JIRAIssue
     public function getEmpCustomer() { return $this->EmpCustomer;}
     public function getPMProjectManager() { return $this->PMProjectManager;}
     public function getRequestDate() { return $this->requestDate;}
-    public function getPMEstimatedDate() { return $this->PMEstimatedDate;}
+    public function getEstimatedStartDate() { return $this->estimatedStartDate;}
+    public function getEstimatedEndDate() { return $this->estimatedEndDate;}
+    public function getPMProjectName() { return $this->PMProjectName;}
 
     public function toArray()
     {

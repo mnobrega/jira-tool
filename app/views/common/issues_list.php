@@ -16,7 +16,7 @@
                 </tr>
                 </thead>
                 <tbody>
-                <?php foreach ($issues as $issue) {?>
+                <?php foreach ($issues as $issue) { /**@var $issue JIRAIssueTblTuple */?>
                     <tr>
                         <td><a href="http://market.kujira.premium-minds.com/browse/<?php echo $issue->getIssueKey();?>" target="_blank"><?php echo $issue->getIssueKey();?></a></td>
                         <td><?php echo $issue->getIssueStatus();?></td>

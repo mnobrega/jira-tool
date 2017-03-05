@@ -55,8 +55,31 @@ class DAOJIRAIssues extends PDOSingleton
                     WHERE ji.id=ji.id
                         ".(!is_null($statuses)?" AND ji.issue_status IN ".$this->inArray($statuses):"")."
                         ".(!is_null($types)?" AND ji.issue_type IN ".$this->inArray($types):"")."
-                    ORDER BY ji.priority ASC";
+                    ORDER BY ji.priority_detail ASC";
         return $this->getObjArray($this->query($query),"JIRAIssueTblTuple");
+    }
+    public function searchJIRAIssuesByPMProjectName($PMProjectName, $orderBy=null)
+    {
+        $query = "SELECT * FROM
+                    (SELECT ji.*
+                        FROM ".self::TABLENAME_JIRA_ISSUES." ji
+                        WHERE ji.pm_project_name='".$PMProjectName."') AS x
+                  ORDER BY ".(!is_null($orderBy)?$orderBy:"priority_detail ASC");
+
+        return $this->getObjArray($this->query($query),"JIRAIssueTblTuple");
+    }
+    private function getJIRAIssues(Array $issueKeys=null)
+    {
+        $query = "SELECT ji.*
+                    FROM ".self::TABLENAME_JIRA_ISSUES." ji
+                    WHERE ji.id=ji.id".
+                        (!is_null($issueKeys)?" AND ji.issue_key IN ('".implode("','",$issueKeys)."')":"");
+
+        return $this->query($query);
+    }
+    public function getJIRAIssueByKey($issueKey)
+    {
+        return $this->getObj($this->getJIRAIssues(array($issueKey)),"JIRAIssueTblTuple",false);
     }
     /**
      * @param JIRAIssueTblTuple $tuple
@@ -66,7 +89,8 @@ class DAOJIRAIssues extends PDOSingleton
         $query = "INSERT INTO ".self::TABLENAME_JIRA_ISSUES." (issue_key, issue_status, summary, release_summary,
             priority, issue_type, project, original_estimate, remaining_estimate, release_date, labels, assignee,
             assignee_key, emp_it_requestor, epic_name, epic_link, epic_colour, priority_detail, project_key,
-            short_summary, emp_customer, pm_project_manager, request_date, pm_estimated_date, due_date)
+            short_summary, emp_customer, pm_project_manager, request_date, estimated_start_date,
+            estimated_end_date, due_date,pm_project_name)
             VALUES (
                 '".$tuple->getIssueKey()."',
                 '".$tuple->getIssueStatus()."',
@@ -91,19 +115,36 @@ class DAOJIRAIssues extends PDOSingleton
                 '".$tuple->getEMPCustomer()."',
                 '".$tuple->getPMProjectManager()."',
                 ".(!is_null($tuple->getRequestDate())?"'".$tuple->getRequestDate()."'":"NULL").",
-                ".(!is_null($tuple->getPMEstimatedDate())?"'".$tuple->getPMEstimatedDate()."'":"NULL").",
-                ".(!is_null($tuple->getDueDate())?"'".$tuple->getDueDate()."'":"NULL").")";
+                ".(!is_null($tuple->getEstimatedStartDate())?"'".$tuple->getEstimatedStartDate()."'":"NULL").",
+                ".(!is_null($tuple->getEstimatedEndDate())?"'".$tuple->getEstimatedEndDate()."'":"NULL").",
+                ".(!is_null($tuple->getDueDate())?"'".$tuple->getDueDate()."'":"NULL").",
+                '".$tuple->getPMProjectName()."')";
 
         $this->query($query);
     }
-    public function updateJIRAIssue($issueKey, $priorityDetail=null, $originalEstimate=null)
+    private function updateJIRAIssue($issueKey, $priorityDetail=null, $originalEstimate=null,
+                                     $estimatedStartDate=null, $estimatedEndDate=null)
     {
         $query = "UPDATE ".self::TABLENAME_JIRA_ISSUES." SET
                         issue_key = issue_key
                         ".(!is_null($priorityDetail)?" ,priority_detail='".$priorityDetail."'":"")."
                         ".(!is_null($originalEstimate)?" ,original_estimate='".$originalEstimate."'":"")."
+                        ".(!is_null($estimatedStartDate)?" ,estimated_start_date='".$estimatedStartDate."'":"")."
+                        ".(!is_null($estimatedEndDate)?" ,estimated_end_date='".$estimatedEndDate."'":"")."
                     WHERE issue_key='".$issueKey."';";
         $this->query($query);
+    }
+    public function updateJIRAIssuePriorityDetail($issueKey, $priorityDetail)
+    {
+        $this->updateJIRAIssue($issueKey,$priorityDetail,null);
+    }
+    public function updateJIRAIssueOriginalEstimate($issueKey, $originalEstimate)
+    {
+        $this->updateJIRAIssue($issueKey,null,$originalEstimate);
+    }
+    public function updateJIRAIssueDateEstimates($issueKey, $PMEstimatedStartDate, $PMEstimatedEndDate)
+    {
+        $this->updateJIRAIssue($issueKey,null,null,$PMEstimatedStartDate, $PMEstimatedEndDate);
     }
     public function deleteAllJIRAIssues()
     {
@@ -197,8 +238,9 @@ class JIRAIssueTblTuple
     private $EMPCustomer;
     private $PMProjectManager;
     private $requestDate;
-    private $PMEstimatedDate;
-
+    private $estimatedStartDate;
+    private $estimatedEndDate;
+    private $PMProjectName;
 
     public function __construct($row)
     {
@@ -227,7 +269,9 @@ class JIRAIssueTblTuple
         $this->EMPCustomer = $row['emp_customer'];
         $this->PMProjectManager = $row['pm_project_manager'];
         $this->requestDate = $row['request_date'];
-        $this->PMEstimatedDate = $row['pm_estimated_date'];
+        $this->estimatedStartDate = $row['estimated_start_date'];
+        $this->estimatedEndDate = $row['estimated_end_date'];
+        $this->PMProjectName = $row['pm_project_name'];
     }
 
     public function getIssueKey() { return $this->issueKey;}
@@ -255,7 +299,9 @@ class JIRAIssueTblTuple
     public function getEMPCustomer() { return $this->EMPCustomer;}
     public function getPMProjectManager() { return $this->PMProjectManager;}
     public function getRequestDate() { return $this->requestDate;}
-    public function getPMEstimatedDate() {return $this->PMEstimatedDate;}
+    public function getEstimatedStartDate() { return $this->estimatedStartDate;}
+    public function getEstimatedEndDate() {return $this->estimatedEndDate;}
+    public function getPMProjectName() { return $this->PMProjectName;}
 }
 
 class JIRAIssueTblTupleExtended extends JIRAIssueTblTuple

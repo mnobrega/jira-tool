@@ -26,7 +26,7 @@
                     <th>Resp. EMP</th>
                     <th>Resp. PM</th>
                     <th>App</th>
-                    <th>Esfuerzo (Días)</th>
+                    <th>Esfuerzo (Semanas)</th>
                     <th>Cliente</th>
                     <th>Fecha Solicitud</th>
                     <th>Fecha EMP</th>
@@ -52,11 +52,11 @@
                         <td><?php echo $issue->getEMPITRequestor();?></td>
                         <td><?php echo $issue->getPMProjectManager();?></td>
                         <td><?php echo $issue->getProject();?></td>
-                        <td><?php echo round(($issue->getOriginalEstimate()/3600)/8,2)==0?"n/d":round(($issue->getOriginalEstimate()/3600)/8,2);?></td>
+                        <td><?php echo round((($issue->getOriginalEstimate()/3600)/8)/5,2)==0?"n/d":round((($issue->getOriginalEstimate()/3600)/8)/5,2);?></td>
                         <td><?php echo $issue->getEMPCustomer();?></td>
                         <td><?php echo $issue->getRequestDate();?></td>
                         <td><?php echo $issue->getDueDate();?></td>
-                        <td><?php echo $issue->getPMEstimatedDate();?></td>
+                        <td><?php echo $issue->getEstimatedEndDate();?></td>
                         <td><!-- dependencias --></td>
                         <td><?php echo $issue->getReleaseDate();?></td>
                     </tr>
@@ -122,7 +122,7 @@
                 {"width":"5%"}, // Dependencies
                 {"width":"5%"}  // PM Deploy Date
              ],
-            order: [[4,"asc"]]
+            order: [[0,"asc"]]
         });
     } );
 </script>

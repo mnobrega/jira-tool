@@ -14,15 +14,15 @@
         DAOJIRAIssues::STATUS_ANALYSED
     );
 
+
     $JIRAProjects = array();
     $JIRAProjectsIssues = array();
     $projects = $appService->getProjectsByTeamKey(AppService::TEAM_MARKETBILITY_KEY, false);
     foreach ($projects as $project) {
-        $projectIssues = $JIRAService->getPersistedIssuesWhere($project->getIssuesAllocationCriteriaSQL(),
-            $JIRAIssuesSelectedStatuses);
-        $projectTeamAllocatedTime = $appService->getProjectTeamAllocatedTime($project->getName());
+        $projectIssues = $JIRAService->getPersistedIssuesByPMProjectName($project->getName(),"estimated_end_date ASC");
+        $workingDayHours = $appService->getProjectTeamAllocatedTime($project->getName());
         $JIRAProjectsIssues[$project->getName()] = $JIRAService->getTeamRoadmapData($projectIssues,$project->getName(),
-            $projectTeamAllocatedTime->getTeamAllocatedHoursPerDay());
+            $workingDayHours->getTeamAllocatedHoursPerDay());
         if (!in_array($project->getJIRAProjectKey(),$JIRAProjects)) {
             $JIRAProjects[] = $project->getJIRAProjectKey();
         }

@@ -32,7 +32,6 @@ class ProjectsTable extends AbstractMigration
             ->addColumn('team_key','string',array('limit'=>50))
             ->addColumn('jira_project_key','string',array('limit'=>10))
             ->addColumn('team_allocated_percentage','float')
-            ->addColumn('issues_allocation_criteria_sql','text')
             ->addColumn('hidden','boolean',array('default'=>true))
             ->addTimestamps()
             ->save();

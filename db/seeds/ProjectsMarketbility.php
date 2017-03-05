@@ -24,10 +24,6 @@ class ProjectsMarketbility extends AbstractSeed
                 'team_key'=>'MM',
                 'jira_project_key'=>DAOJIRAIssues::DAO_PROJECT_MOBILITY,
                 'team_allocated_percentage'=>37.5,
-                'issues_allocation_criteria_sql'=>'project_key="MOB"
-                    AND issue_type IN ("Story","Improvement")
-                    AND emp_it_requestor IS NOT NULL
-                    AND epic_original_estimate >= '.JIRAService::EMPARK_PROYECTO_THRESHOLD,
                 'hidden'=>0,
             ),
             array(
@@ -35,9 +31,6 @@ class ProjectsMarketbility extends AbstractSeed
                 'team_key'=>'MM',
                 'jira_project_key'=>DAOJIRAIssues::DAO_PROJECT_MOBILITY,
                 'team_allocated_percentage'=>12.5,
-                'issues_allocation_criteria_sql'=>'project_key="MOB"
-                    AND emp_it_requestor IS NOT NULL
-                    AND epic_original_estimate < '.JIRAService::EMPARK_PROYECTO_THRESHOLD,
                 'hidden'=>0,
             ),
             array(
@@ -45,8 +38,6 @@ class ProjectsMarketbility extends AbstractSeed
                 'team_key'=>'MM',
                 'jira_project_key'=>DAOJIRAIssues::DAO_PROJECT_MOBILITY,
                 'team_allocated_percentage'=>12.5,
-                'issues_allocation_criteria_sql'=>'project_key="MOB"
-                    AND emp_it_requestor IS NULL',
                 'hidden'=>1,
             ),
             array(
@@ -54,10 +45,6 @@ class ProjectsMarketbility extends AbstractSeed
                 'team_key'=>'MM',
                 'jira_project_key'=>DAOJIRAIssues::DAO_PROJECT_MARKET,
                 'team_allocated_percentage'=>17.5,
-                'issues_allocation_criteria_sql'=>'project_key="APK"
-                    AND issue_type IN ("Story","Improvement")
-                    AND emp_it_requestor IS NOT NULL
-                    AND epic_original_estimate >= '.JIRAService::EMPARK_PROYECTO_THRESHOLD,
                 'hidden'=>0,
             ),
             array(
@@ -65,9 +52,6 @@ class ProjectsMarketbility extends AbstractSeed
                 'team_key'=>'MM',
                 'jira_project_key'=>DAOJIRAIssues::DAO_PROJECT_MARKET,
                 'team_allocated_percentage'=>7.5,
-                'issues_allocation_criteria_sql'=>'project_key="APK"
-                    AND emp_it_requestor IS NOT NULL
-                    AND epic_original_estimate < '.JIRAService::EMPARK_PROYECTO_THRESHOLD,
                 'hidden'=>0,
             ),
             array(
@@ -75,8 +59,6 @@ class ProjectsMarketbility extends AbstractSeed
                 'team_key'=>'MM',
                 'jira_project_key'=>DAOJIRAIssues::DAO_PROJECT_MARKET,
                 'team_allocated_percentage'=>12.5,
-                'issues_allocation_criteria_sql'=>'project_key="APK"
-                    AND emp_it_requestor IS NULL',
                 'hidden'=>1,
             ),
         );
