@@ -36,7 +36,11 @@
                 </tr>
                 </thead>
                 <tbody>
-                <?php foreach ($issues as $issue) { /**@var $issue JIRAIssueTblTupleExtended */?>
+                <?php foreach ($issues as $issue) {
+                    /**@var $issue JIRAIssueTblTupleExtended */
+                    $estimatedEndDate = new DateTime($issue->getEstimatedEndDate());
+                    ?>
+
                     <tr>
                         <td>
                             <input type="hidden" id="oldPriorityDetail[<?php echo $issue->getIssueKey();?>]" name="oldPriorityDetail[<?php echo $issue->getIssueKey();?>]"
@@ -47,7 +51,7 @@
                         <td><?php echo $issue->getPriority();?></td>
                         <td><?php echo $issue->getIssueStatus();?></td>
                         <td><a href="http://market.kujira.premium-minds.com/browse/<?php echo $issue->getIssueKey();?>" target="_blank"><?php echo $issue->getIssueKey();?></a></td>
-                        <td><?php echo $issue->getEpicShortSummary().(strlen($issue->getShortSummary()>0)?" - ".$issue->getShortSummary():"");?></td>
+                        <td><?php echo $issue->getShortSummary();?></td>
                         <td><?php echo $issue->getReleaseSummary();?></td>
                         <td><?php echo $issue->getEMPITRequestor();?></td>
                         <td><?php echo $issue->getPMProjectManager();?></td>
@@ -56,7 +60,7 @@
                         <td><?php echo $issue->getEMPCustomer();?></td>
                         <td><?php echo $issue->getRequestDate();?></td>
                         <td><?php echo $issue->getDueDate();?></td>
-                        <td><?php echo $issue->getEstimatedEndDate();?></td>
+                        <td><?php echo $estimatedEndDate->format("Y-m-d");?></td>
                         <td><!-- dependencias --></td>
                         <td><?php echo $issue->getReleaseDate();?></td>
                     </tr>

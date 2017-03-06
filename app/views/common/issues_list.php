@@ -13,6 +13,7 @@
                     <th>Days (R/E)</th>
                     <th>Progress (%)</th>
                     <th>Requestor</th>
+                    <th>PM Project Manager</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -32,6 +33,7 @@
                         <td><?php echo round(max($issuesTimeSpent[$issue->getIssueKey()],0)/8,1);?> / <?php echo round($issue->getOriginalEstimate()/3600/8,1);?></td>
                         <td><?php echo (round($issue->getOriginalEstimate()/3600,2)>0?round(max($issuesTimeSpent[$issue->getIssueKey()],0)/round($issue->getOriginalEstimate()/3600,2),2)*100:0);?></td>
                         <td><?php echo $issue->getEMPITRequestor();?></td>
+                        <td><?php echo $issue->getPMProjectManager();?></td>
                     </tr>
                 <?php } ?>
                 </tbody>

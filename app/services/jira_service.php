@@ -22,7 +22,7 @@ class JIRAService
     const DELAY_DAYS_THRESHOLD = -1; //days
     const ISSUE_TOLERANCE_PERCENTAGE = 10; //%
 
-    const EMPARK_PROYECTO_THRESHOLD = 8*10*3600; //2 weeks
+    const EMPARK_PROYECTO_THRESHOLD = 288000; //2 weeks
 
     static $projects = array (
         "APK"=>"eos Market",
@@ -436,6 +436,7 @@ class JIRAService
     public function editIssuePriorityDetail($issueKey, $priorityDetail)
     {
         $params = array(
+            'notifyUsers'=>false,
             'fields'=>array(
                 "customfield_10916" => floatval($priorityDetail)
             )
@@ -449,6 +450,7 @@ class JIRAService
         $end = new DateTime($estimatedEndDate,new DateTimeZone(INSTANCE_TIMEZONE));
 
         $params = array (
+            'notifyUsers'=>false,
             'fields'=>array(
                 "customfield_10927" => $start->format("Y-m-d\TH:i:s.0TZ"),
                 "customfield_10928" => $end->format("Y-m-d\TH:i:s.0TZ"),
