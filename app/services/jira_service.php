@@ -347,12 +347,17 @@ class JIRAService
 
         $currentStart = null;
         $now = new DateTime();
+        $excludedIssueStatuses = array (
+            DAOJIRAIssues::STATUS_QA_DONE,
+            DAOJIRAIssues::STATUS_DEV_DONE,
+            DAOJIRAIssues::STATUS_READY_TO_DEPLOY
+        );
         foreach ($JIRAIssuesOrderedByProgress as $issue) {
             /**@var $issue JIRAIssueTblTuple */
             $workingDaysLeft = max(0.00,ceil(($issue->getOriginalEstimate()/3600 -
                     $JIRAIssuesTimeSpent[$issue->getIssueKey()])/$workingDayHours));
 
-            if ($workingDaysLeft>0) {
+            if ($workingDaysLeft>0 && !in_array($issue->getIssueStatus(),$excludedIssueStatuses)) {
                 $start = (is_null($currentStart)?$now->format("Y-m-d 00:00:00"):$currentStart->format("Y-m-d H:i:s"));
                 $endDate = getEndDateFromWorkingHours(new DateTime($start),
                     $workingDaysLeft*(1+self::ISSUE_TOLERANCE_PERCENTAGE/100));
@@ -364,7 +369,7 @@ class JIRAService
                 $currentStart = new DateTime($end);
                 $currentStart->modify("+1 second");
             } else {
-                //ignore issue
+                $this->editIssueDateEstimates($issue->getIssueKey(),$now->format("Y-m-d H:i:s"),$now->format("Y-m-d H:i:s"));
             }
         }
 
@@ -389,6 +394,12 @@ class JIRAService
      */
     public function getTeamRoadmapData(Array $JIRAIssues, $resourceName, $workingHours)
     {
+        $excludedIssueStatuses = array (
+            DAOJIRAIssues::STATUS_QA_DONE,
+            DAOJIRAIssues::STATUS_DEV_DONE,
+            DAOJIRAIssues::STATUS_READY_TO_DEPLOY
+        );
+
         $epicIssuesMap = array();
         $epicIssues = $this->getPersistedIssues(null,array(DAOJIRAIssues::TYPE_EPIC));
         foreach ($epicIssues as $epicIssue)
@@ -411,7 +422,7 @@ class JIRAService
             $workingDaysLeft = max(0.00,ceil(($issue->getOriginalEstimate()/3600 -
                     $JIRAIssuesTimeSpent[$issue->getIssueKey()])/$workingHours));
 
-            if ($workingDaysLeft>0) {
+            if ($workingDaysLeft>0 && !in_array($issue->getIssueStatus(),$excludedIssueStatuses)) {
                 $row = array();
                 $row['resource'] = $resourceName;
                 $row['issueKey'] = $issue->getIssueKey();

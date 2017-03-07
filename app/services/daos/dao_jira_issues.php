@@ -73,7 +73,7 @@ class DAOJIRAIssues extends PDOSingleton
         $query = "SELECT ji.*
                     FROM ".self::TABLENAME_JIRA_ISSUES." ji
                     WHERE ji.id=ji.id".
-                        (!is_null($issueKeys)?" AND ji.issue_key IN ('".implode("','",$issueKeys)."')":"");
+                        (!is_null($issueKeys)?" AND ji.issue_key IN ".$this->inArray($issueKeys):"");
 
         return $this->query($query);
     }
