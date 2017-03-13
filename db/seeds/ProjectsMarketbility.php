@@ -2,7 +2,7 @@
 
 require_once(dirname(__FILE__)."/../../" . "config.php");
 require_once(DIR_SERVICES."jira_service.php");
-require_once(DIR_SERVICES."daos/dao_jira_issues.php");
+require_once(DIR_SERVICES . "daos/dao_jira.php");
 
 use Phinx\Seed\AbstractSeed;
 
@@ -19,46 +19,83 @@ class ProjectsMarketbility extends AbstractSeed
     public function run()
     {
         $projectsData = array(
+
+            // MM_EMP_DEV (Andre, Soares, Marcio)
             array(
                 'name'=>'MOB-EMP-DEV',
-                'team_key'=>'MM',
-                'jira_project_key'=>DAOJIRAIssues::DAO_PROJECT_MOBILITY,
-                'team_allocated_percentage'=>37.5,
+                'team_key'=>'MM_EMP_DEV',
+                'jira_project_key'=>DAOJIRAIssues::PROJECT_MOBILITY,
+                'team_allocated_percentage'=>40,
                 'hidden'=>0,
             ),
             array(
                 'name'=>'MOB-EMP-TSK',
-                'team_key'=>'MM',
-                'jira_project_key'=>DAOJIRAIssues::DAO_PROJECT_MOBILITY,
-                'team_allocated_percentage'=>12.5,
+                'team_key'=>'MM_EMP_DEV',
+                'jira_project_key'=>DAOJIRAIssues::PROJECT_MOBILITY,
+                'team_allocated_percentage'=>10,
                 'hidden'=>0,
             ),
             array(
-                'name'=>'MOB-PM-DEV',
-                'team_key'=>'MM',
-                'jira_project_key'=>DAOJIRAIssues::DAO_PROJECT_MOBILITY,
-                'team_allocated_percentage'=>12.5,
-                'hidden'=>1,
-            ),
-            array(
                 'name'=>'APK-EMP-DEV',
-                'team_key'=>'MM',
-                'jira_project_key'=>DAOJIRAIssues::DAO_PROJECT_MARKET,
-                'team_allocated_percentage'=>17.5,
+                'team_key'=>'MM_EMP_DEV',
+                'jira_project_key'=>DAOJIRAIssues::PROJECT_MARKET,
+                'team_allocated_percentage'=>40,
                 'hidden'=>0,
             ),
             array(
                 'name'=>'APK-EMP-TSK',
-                'team_key'=>'MM',
-                'jira_project_key'=>DAOJIRAIssues::DAO_PROJECT_MARKET,
-                'team_allocated_percentage'=>7.5,
+                'team_key'=>'MM_EMP_DEV',
+                'jira_project_key'=>DAOJIRAIssues::PROJECT_MARKET,
+                'team_allocated_percentage'=>10,
+                'hidden'=>0,
+            ),
+
+            // MM_EMP_QA (Sandro,Miguel)
+            array(
+                'name'=>'MOB-EMP-TSK',
+                'team_key'=>'MM_EMP_QA',
+                'jira_project_key'=>DAOJIRAIssues::PROJECT_MOBILITY,
+                'team_allocated_percentage'=>50,
                 'hidden'=>0,
             ),
             array(
+                'name'=>'APK-EMP-TSK',
+                'team_key'=>'MM_EMP_QA',
+                'jira_project_key'=>DAOJIRAIssues::PROJECT_MARKET,
+                'team_allocated_percentage'=>50,
+                'hidden'=>0,
+            ),
+
+            // PM DEV (Luis)
+            array(
+                'name'=>'MOB-PM-DEV',
+                'team_key'=>'MM_PM_DEV',
+                'jira_project_key'=>DAOJIRAIssues::PROJECT_MOBILITY,
+                'team_allocated_percentage'=>50,
+                'hidden'=>1,
+            ),
+            array(
                 'name'=>'APK-PM-DEV',
-                'team_key'=>'MM',
-                'jira_project_key'=>DAOJIRAIssues::DAO_PROJECT_MARKET,
-                'team_allocated_percentage'=>12.5,
+                'team_key'=>'MM_PM_DEV',
+                'jira_project_key'=>DAOJIRAIssues::PROJECT_MARKET,
+                'team_allocated_percentage'=>50,
+                'hidden'=>1,
+            ),
+
+
+            // PM QA (Tiago)
+            array(
+                'name'=>'APK-PM-DEV',
+                'team_key'=>'MM_PM_QA',
+                'jira_project_key'=>DAOJIRAIssues::PROJECT_MARKET,
+                'team_allocated_percentage'=>50,
+                'hidden'=>1,
+            ),
+            array(
+                'name'=>'MOB-PM-DEV',
+                'team_key'=>'MM_PM_QA',
+                'jira_project_key'=>DAOJIRAIssues::PROJECT_MOBILITY,
+                'team_allocated_percentage'=>50,
                 'hidden'=>1,
             ),
         );

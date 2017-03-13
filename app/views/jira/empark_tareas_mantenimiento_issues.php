@@ -25,8 +25,8 @@
     );
 
     $selectedProjectKeys = array (
-        DAOJIRAIssues::DAO_PROJECT_MOBILITY,
-        DAOJIRAIssues::DAO_PROJECT_MARKET
+        DAOJIRAIssues::PROJECT_MOBILITY,
+        DAOJIRAIssues::PROJECT_MARKET
     );
 
     $whereSQL = "project_key IN ('".implode("','",$selectedProjectKeys)."')

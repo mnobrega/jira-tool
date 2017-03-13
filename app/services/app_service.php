@@ -1,13 +1,17 @@
 <?php
 
 require ROOT_DIR.'vendor/autoload.php';
-require ROOT_DIR . 'app/services/daos/dao_app.php';
+require ROOT_DIR.'app/services/daos/dao_app.php';
 
 class AppServiceException extends Exception {};
 
 class AppService
 {
-    const TEAM_MARKETBILITY_KEY = "MM";
+    const TEAM_MM_Empark_DEV = "MM_EMP_DEV";
+    const TEAM_MM_Empark_QA = "MM_EMP_QA";
+    const TEAM_MM_Premium_DEV = "MM_PM_DEV";
+    const TEAM_MM_Premium_QA = "MM_PM_QA";
+    const TEAM_MM_Empark_PMA = "MM_EMP_PMA";
 
     private $daoApp;
 
@@ -17,13 +21,13 @@ class AppService
     }
 
     /**
-     * @param $teamKey
+     * @param $teamKeys
      * @param $hidden  Boolean
      * @return Project[]
      */
-    public function getProjectsByTeamKey($teamKey, $hidden=null)
+    public function getProjectNamesByTeamKeys(Array $teamKeys, $hidden=null)
     {
-        return $this->daoApp->getTeamProjects($teamKey, $hidden);
+        return $this->daoApp->getProjectNamesByTeamKeys($teamKeys, $hidden);
     }
 
     /**
@@ -34,5 +38,4 @@ class AppService
     {
         return $this->daoApp->getProjectTeamAllocatedTime($projectName);
     }
-
 }

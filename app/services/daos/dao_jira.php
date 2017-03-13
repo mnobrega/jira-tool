@@ -12,6 +12,7 @@ class DAOJIRAIssues extends PDOSingleton
 {
     const TABLENAME_JIRA_ISSUES = 'jira_issues';
     const TABLENAME_JIRA_ISSUES_HISTORIES = 'jira_issues_histories';
+    const TABLENAME_JIRA_VERSIONS = 'jira_versions';
 
     const HISTORY_ITEM_FIELD_STATUS = 'status';
 
@@ -34,8 +35,8 @@ class DAOJIRAIssues extends PDOSingleton
     const TYPE_IMPROVEMENT = 'Improvement';
     const TYPE_SPIKE = 'Spike';
 
-    const DAO_PROJECT_MOBILITY = 'MOB';
-    const DAO_PROJECT_MARKET = 'APK';
+    const PROJECT_MOBILITY = 'MOB';
+    const PROJECT_MARKET = 'APK';
 
     public function __construct()
     {
@@ -90,7 +91,7 @@ class DAOJIRAIssues extends PDOSingleton
             priority, issue_type, project, original_estimate, remaining_estimate, release_date, labels, assignee,
             assignee_key, emp_it_requestor, epic_name, epic_link, epic_colour, priority_detail, project_key,
             short_summary, emp_customer, pm_project_manager, request_date, estimated_start_date,
-            estimated_end_date, due_date,pm_project_name)
+            estimated_end_date, due_date,pm_project_name, fix_version_id)
             VALUES (
                 '".$tuple->getIssueKey()."',
                 '".$tuple->getIssueStatus()."',
@@ -118,8 +119,10 @@ class DAOJIRAIssues extends PDOSingleton
                 ".(!is_null($tuple->getEstimatedStartDate())?"'".$tuple->getEstimatedStartDate()."'":"NULL").",
                 ".(!is_null($tuple->getEstimatedEndDate())?"'".$tuple->getEstimatedEndDate()."'":"NULL").",
                 ".(!is_null($tuple->getDueDate())?"'".$tuple->getDueDate()."'":"NULL").",
-                '".$tuple->getPMProjectName()."')";
+                '".$tuple->getPMProjectName()."',
+                ".(!is_null($tuple->getFixVersionId())?"'".$tuple->getFixVersionId()."'":"NULL").")";
 
+//        echo($query)."<br>";
         $this->query($query);
     }
     private function updateJIRAIssue($issueKey, $priorityDetail=null, $originalEstimate=null,
@@ -193,15 +196,41 @@ class DAOJIRAIssues extends PDOSingleton
         $this->query($query);
     }
 
+    public function getJIRAVersions()
+    {
+        $query = "SELECT * FROM ".self::TABLENAME_JIRA_VERSIONS;
+        $this->getObjArray($this->query($query),"JIRAVersionTblTuple");
+    }
+
+    public function insertJIRAVersion(JIRAVersionTblTuple $tuple)
+    {
+        $query = "INSERT INTO ".self::TABLENAME_JIRA_VERSIONS." (version_id, project_key, name, released, release_date)
+            VALUES (
+            '".$tuple->getVersionId()."',
+            '".$tuple->getProjectKey()."',
+            '".$tuple->getName()."',
+            ".($tuple->getReleased()?"TRUE":"FALSE").",
+            '".$tuple->getReleaseDate()."');";
+        $this->query($query);
+    }
+
+    public function deleteAllJIRAVersions()
+    {
+        $query = "DELETE FROM ".self::TABLENAME_JIRA_VERSIONS;
+        $this->query($query);
+    }
+
     /** JIRAIssueTblTupleExtended */
     public function searchJIRAIssuesWhere($where=null, Array $statuses=null)
     {
         $query = "SELECT * FROM
                     (SELECT ji.*,
                           IFNULL(epic.original_estimate,0) AS epic_original_estimate,
-                          IFNULL(epic.short_summary,'') AS epic_short_summary
+                          IFNULL(epic.short_summary,'') AS epic_short_summary,
+                          v.released
                         FROM ".self::TABLENAME_JIRA_ISSUES." ji
-                            JOIN ".self::TABLENAME_JIRA_ISSUES." epic ON epic.issue_key=ji.epic_link
+                            LEFT JOIN ".self::TABLENAME_JIRA_ISSUES." epic ON epic.issue_key=ji.epic_link
+                            LEFT JOIN ".self::TABLENAME_JIRA_VERSIONS." v ON v.version_id=ji.fix_version_id
                         WHERE ji.id = ji.id
                             ".(!is_null($statuses)?" AND ji.issue_status IN ".$this->inArray($statuses):"").") AS x
                     WHERE x.id=x.id
@@ -209,6 +238,30 @@ class DAOJIRAIssues extends PDOSingleton
                     ORDER BY x.priority ASC;";
         return $this->getObjArray($this->query($query),"JIRAIssueTblTupleExtended");
     }
+}
+
+class JIRAVersionTblTuple
+{
+    private $versionId;
+    private $projectKey;
+    private $name;
+    private $released;
+    private $releaseDate;
+
+    public function __construct($row)
+    {
+        $this->versionId = $row['version_id'];
+        $this->projectKey = $row['project_key'];
+        $this->name = $row['name'];
+        $this->released = $row['released'];
+        $this->releaseDate = $row['release_date'];
+    }
+
+    public function getVersionId() { return $this->versionId;}
+    public function getProjectKey() { return $this->projectKey;}
+    public function getName() { return $this->name;}
+    public function getReleased() { return $this->released;}
+    public function getReleaseDate() { return $this->releaseDate;}
 }
 
 class JIRAIssueTblTuple
@@ -222,6 +275,7 @@ class JIRAIssueTblTuple
     private $projectKey;
     private $originalEstimate;
     private $remainingEstimate;
+    private $fixVersionId;
     private $releaseDate;
     private $dueDate;
     private $labels;
@@ -253,6 +307,7 @@ class JIRAIssueTblTuple
         $this->projectKey = $row['project_key'];
         $this->originalEstimate = $row['original_estimate'];
         $this->remainingEstimate = $row['remaining_estimate'];
+        $this->fixVersionId = $row['fix_version_id'];
         $this->releaseDate = $row['release_date'];
         $this->dueDate = $row['due_date'];
         $this->labels = $row['labels'];
@@ -283,6 +338,7 @@ class JIRAIssueTblTuple
     public function getProjectKey() { return $this->projectKey;}
     public function getOriginalEstimate() { return $this->originalEstimate;}
     public function getRemainingEstimate() { return $this->remainingEstimate;}
+    public function getFixVersionId() { return $this->fixVersionId;}
     public function getReleaseDate() { return $this->releaseDate;}
     public function getDueDate() {return $this->dueDate;}
     public function getLabels() { return $this->labels;}

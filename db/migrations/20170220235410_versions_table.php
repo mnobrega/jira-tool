@@ -29,9 +29,10 @@ class VersionsTable extends AbstractMigration
     {
         $jiraVersionsTbl = $this->table('jira_versions');
         $jiraVersionsTbl->addColumn('version_id','integer')
+            ->addColumn('project_key','string')
             ->addColumn('name','string',array('limit'=>100))
-            ->addColumn('release','string',array('limit'=>100))
-            ->addColumn('releaseDate','date')
+            ->addColumn('released','string',array('limit'=>100))
+            ->addColumn('release_date','date')
             ->addIndex('id')
             ->addTimestamps()
             ->save();

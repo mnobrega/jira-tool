@@ -16,43 +16,68 @@ class TeamsMarketbility extends AbstractSeed
     {
         $teamsData = array(
             array(
-                'key'=>'MM',
-                'name'=>'Marketbility Team',
+                'key'=>'MM_EMP_DEV',
+                'name'=>'Marketbility Empark Dev',
             ),
+            array(
+                'key'=>'MM_EMP_QA',
+                'name'=>'Marketbility Empark QA',
+            ),
+            array(
+                'key'=>'MM_EMP_PMA',
+                'name'=>'Marketbility Empark Product Management',
+            ),
+            array(
+                'key'=>'MM_PM_DEV',
+                'name'=>'Marketbility Premium Minds Dev',
+            ),
+            array(
+                'key'=>'MM_PM_QA',
+                'name'=>'Marketbility Premium Minds QA'
+            )
         );
 
         $teamsPersonsData = array(
             array(
-                'team_key'=>'MM',
+                'team_key'=>'MM_EMP_PMA',
                 'person_username'=>'mnobrega',
-                'person_allocated_hours_per_day'=>8,
+                'person_allocated_hours_per_day'=>7,
             ),
             array(
-                'team_key'=>'MM',
+                'team_key'=>'MM_EMP_DEV',
+                'person_username'=>'mnobrega',
+                'person_allocated_hours_per_day'=>1,
+            ),
+            array(
+                'team_key'=>'MM_EMP_DEV',
                 'person_username'=>'asoares',
                 'person_allocated_hours_per_day'=>8,
             ),
             array(
-                'team_key'=>'MM',
+                'team_key'=>'MM_EMP_DEV',
                 'person_username'=>'sguerreiro',
-                'person_allocated_hours_per_day'=>0,
+                'person_allocated_hours_per_day'=>8,
             ),
             array(
-                'team_key'=>'MM',
+                'team_key'=>'MM_EMP_QA',
+                'person_username'=>'sottaviani',
+                'person_allocated_hours_per_day'=>4,
+            ),
+            array(
+                'team_key'=>'MM_EMP_QA',
+                'person_username'=>'mmatos',
+                'person_allocated_hours_per_day'=>4
+            ),
+            array(
+                'team_key'=>'MM_PM_DEV',
                 'person_username'=>'lgoncalves',
                 'person_allocated_hours_per_day'=>8,
             ),
             array(
-                'team_key'=>'MM',
-                'person_username'=>'sottaviani',
-                'person_allocated_hours_per_day'=>0,
-            ),
-            array(
-                'team_key'=>'MM',
-                'person_username'=>'mmatos',
-                'person_allocated_hours_per_day'=>0
+                'team_key'=>'MM_PM_QA',
+                'person_username'=>'tcarreira',
+                'person_allocated_hours_per_day'=>4
             )
-
         );
 
         $this->execute("DELETE FROM app_teams");

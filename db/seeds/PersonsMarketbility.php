@@ -34,7 +34,22 @@ class PersonsMarketbility extends AbstractSeed
                 'username'=>'lgoncalves',
                 'full_name'=>'Luís Gonçalves',
                 'jira_username'=>'lgoncalves',
-            )
+            ),
+            array(
+                'username'=>'sottaviani',
+                'full_name'=>'Sandro Ottaviani',
+                'jira_username'=>'sottaviani',
+            ),
+            array(
+                'username'=>'mmatos',
+                'full_name'=>'Miguel Matos',
+                'jira_username'=>'mmatos',
+            ),
+            array(
+                'username'=>'tcarreira',
+                'full_name'=>'Tiago Carreira',
+                'jira_username'=>'tcarreira',
+            ),
         );
 
         $this->execute("DELETE FROM app_persons");

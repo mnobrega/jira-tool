@@ -4,7 +4,7 @@ require ROOT_DIR.'vendor/autoload.php';
 require ROOT_DIR.'app/common/converters.php';
 require ROOT_DIR.'app/common/time.php';
 
-require ROOT_DIR . 'app/services/daos/dao_jira_issues.php';
+require ROOT_DIR . 'app/services/daos/dao_jira.php';
 
 class JIRAServiceException extends Exception {};
 
@@ -58,7 +58,7 @@ class JIRAService
     /**
      * @return Array JIRAVersion []
      */
-    public function getVersions($JIRAProjectKeys)
+    public function getProjectsVersions(Array $JIRAProjectKeys)
     {
         $JIRAVersions = array();
         foreach ($JIRAProjectKeys as $JIRAProjectKey) {
@@ -83,12 +83,11 @@ class JIRAService
         $issues = array();
         $statusString = '"' . implode('","', $status) . '"';
 
-        $this->walker->push('status IN (' . $statusString . ')  AND resolution=Unresolved ORDER BY priority ASC');
+        $this->walker->push('status IN (' . $statusString . ') ORDER BY priority ASC');
         foreach ($this->walker as $issue) {
             /**@var $issue Jira_Issue */
             $issues[] = new JIRAIssue($issue);
         }
-
         return $issues;
     }
     public function getIssuesByTypes(Array $types)
@@ -199,6 +198,7 @@ class JIRAService
      */
     public function persistIssues(Array $issues)
     {
+        $this->daoJIRAIssues->deleteAllJIRAIssues();
         $epics = array();
         foreach ($issues as $issue)
         {
@@ -248,6 +248,23 @@ class JIRAService
                     $JIRAIssueHistoryTblTuple = new JIRAIssueHistoryTblTuple($row);
                     $this->daoJIRAIssues->insertJIRAIssueHistory($JIRAIssueHistoryTblTuple);
                 }
+            }
+        }
+    }
+
+    /**
+     * @param $projectVersions []
+     */
+    public function persistVersions(Array $projectsVersions)
+    {
+        $this->daoJIRAIssues->deleteAllJIRAVersions();
+        foreach ($projectsVersions as $projectKey=>$projectVersions) {
+            foreach ($projectVersions as $version) {
+                /**@var $version JIRAVersion*/
+                $versionArray = $version->toArray();
+                $versionArray['project_key'] = $projectKey;
+                $versionArray['version_id'] = $version->getId();
+                $this->daoJIRAIssues->insertJIRAVersion(new JIRAVersionTblTuple($versionArray));
             }
         }
     }
@@ -316,10 +333,10 @@ class JIRAService
         return $this->daoJIRAIssues->searchJIRAIssuesWhere($whereSQL);
     }
     /**
-     * @param Project $PMProject
+     * @param ProjectName $PMProjectName
      * @param float $workingDayHours
      */
-    public function updatePMProjectsEstimatedDates($PMProject, $workingDayHours)
+    public function updatePMProjectsEstimatedDates(ProjectName $PMProjectName, $workingDayHours)
     {
         $inProgressIssueStatuses = array(
             DAOJIRAIssues::STATUS_DEV_IN_PROGRESS,
@@ -332,7 +349,7 @@ class JIRAService
         $toStrings = array(DAOJIRAIssues::STATUS_DEV_IN_PROGRESS,
             DAOJIRAIssues::STATUS_QA_IN_PROGRESS);
 
-        $projectIssues = $this->getPersistedIssuesByPMProjectName($PMProject->getName(),null);
+        $projectIssues = $this->getPersistedIssuesByPMProjectName($PMProjectName->getName(),null);
         $JIRAIssuesTimeSpent = $this->getPersistedIssuesTimeSpent($projectIssues);
 
         $JIRAIssuesOrderedByProgress = array();
@@ -535,6 +552,12 @@ class JIRAVersion
     public function getName() { return $this->name;}
     public function getReleased() { return $this->released;}
     public function getReleaseDate(){ return $this->releaseDate;}
+
+    public function toArray()
+    {
+        $params = get_object_vars($this);
+        return convertCamelCaseKeys2camel_case($params);
+    }
 }
 
 class JIRAIssue
@@ -547,6 +570,7 @@ class JIRAIssue
     private $projectKey;
     private $originalEstimate;
     private $remainingEstimate;
+    private $fixVersionId;
     private $releaseDate;
     private $dueDate;
     private $labels;
@@ -582,6 +606,8 @@ class JIRAIssue
         $this->projectKey = $fields['Project']['key'];
         $this->originalEstimate = $fields['Original Estimate'];
         $this->remainingEstimate = $fields['Remaining Estimate'];
+        $this->fixVersionId = (count($fields['Fix Version/s'])==1 && array_key_exists('releaseDate',$fields['Fix Version/s'][0]))?
+            $fields['Fix Version/s'][0]['id']:null;
         $this->releaseDate = (count($fields['Fix Version/s'])==1 && array_key_exists('releaseDate',$fields['Fix Version/s'][0]))?
             $fields['Fix Version/s'][0]['releaseDate']:null;
         $this->dueDate = $fields['Due Date'];
@@ -592,7 +618,6 @@ class JIRAIssue
         $this->epicName = (array_key_exists('Epic Name',$fields)?$fields['Epic Name']:null);
         $this->epicLink = (array_key_exists('Epic Link',$fields)?$fields['Epic Link']:null);
         $this->epicColour = (array_key_exists('Epic Colour',$fields)?$fields['Epic Colour']:null);
-
 
         $estimatedStartDate = new DateTime($fields['Estimated Start Date'], new DateTimeZone(INSTANCE_TIMEZONE));
         $estimatedEndDate = new DateTime($fields['Estimated End Date'], new DateTimeZone(INSTANCE_TIMEZONE));
@@ -616,6 +641,7 @@ class JIRAIssue
     public function getProjectKey() { return $this->projectKey;}
     public function getOriginalEstimate() { return $this->originalEstimate;}
     public function getRemainingEstimate() { return $this->remainingEstimate;}
+    public function getFixVersionId() {return $this->fixVersionId;}
     public function getReleaseDate() { return $this->releaseDate;}
     public function getDueDate() { return $this->dueDate;}
     public function getLabels() { return $this->labels;}

@@ -20,13 +20,14 @@ class DAOApp extends PDOSingleton
      * @param $hidden Boolean
      * @return Project[]
      */
-    public function getTeamProjects($teamKey, $hidden=null)
+    public function getProjectNamesByTeamKeys(Array $teamKeys, $hidden=null)
     {
-        $query = "SELECT *
+        $query = "SELECT p.name
                     FROM ".self::TABLENAME_APP_PROJECTS." p
-                    WHERE p.team_key='".$teamKey."'"
-                      .(!is_null($hidden)?" AND p.hidden=".($hidden?"TRUE":"FALSE"):"");
-        return $this->getObjArray($this->query($query),"Project");
+                    WHERE p.team_key IN ".$this->inArray($teamKeys)
+                        .(!is_null($hidden)?" AND p.hidden=".($hidden?"TRUE":"FALSE"):"")."
+                    GROUP BY p.name";
+        return $this->getObjArray($this->query($query),"ProjectName");
     }
 
     /**
@@ -35,14 +36,15 @@ class DAOApp extends PDOSingleton
      */
     public function getProjectTeamAllocatedTime($projectName)
     {
-        $query ="SELECT p.name AS project_name,
-                    ROUND(SUM(tp.person_allocated_hours_per_day)*(p.team_allocated_percentage/100),2) AS team_allocated_hours_per_day
-                    FROM ".self::TABLENAME_APP_PROJECTS." p
-                    JOIN ".self::TABLENAME_APP_TEAMS." t ON t.key = p.team_key
-                    JOIN ".self::TABLENAME_APP_TEAMS_PERSONS." tp ON tp.team_key = t.key
-                    WHERE p.name='".$projectName."'
-                    GROUP BY p.name, p.team_allocated_percentage;";
-
+        $query ="SELECT x.project_name, SUM(team_allocated_hours_per_day) AS team_allocated_hours_per_day FROM (
+                        SELECT p.name AS project_name,
+                          ROUND(SUM(tp.person_allocated_hours_per_day)*(p.team_allocated_percentage/100),2) AS team_allocated_hours_per_day
+                        FROM ".self::TABLENAME_APP_PROJECTS." p
+                            JOIN ".self::TABLENAME_APP_TEAMS." t ON t.key = p.team_key
+                            JOIN ".self::TABLENAME_APP_TEAMS_PERSONS." tp ON tp.team_key = t.key
+                        WHERE p.name='".$projectName."'
+                        GROUP BY p.name, p.team_allocated_percentage) x
+                    GROUP BY x.project_name;";
         return $this->getObj($this->query($query),"ProjectTeamAllocatedTime",false);
     }
 }
@@ -62,24 +64,35 @@ class ProjectTeamAllocatedTime
     public function getTeamAllocatedHoursPerDay() {return $this->teamAllocatedHoursPerDay;}
 }
 
-class Project
+class ProjectName
 {
     private $name;
+
+    public function __construct($row)
+    {
+        $this->name = $row['name'];
+    }
+
+    public function getName() {return $this->name;}
+}
+
+class Project extends ProjectName
+{
     private $teamKey;
     private $JIRAProjectKey;
     private $teamAllocatedPercentage;
 
     public function __construct($row)
     {
-        $this->name = $row['name'];
+        parent::__construct($row);
         $this->teamKey = $row['team_key'];
         $this->JIRAProjectKey = $row['jira_project_key'];
         $this->teamAllocatedPercentage = $row['team_allocated_percentage'];
     }
 
-    public function getName() { return $this->name;}
     public function getTeamKey() { return $this->teamKey;}
     public function getJIRAProjectKey() { return $this->JIRAProjectKey;}
     public function getTeamAllocatedPercentage() { return $this->teamAllocatedPercentage;}
 
 }
+

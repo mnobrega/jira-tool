@@ -17,7 +17,19 @@
         DAOJIRAIssues::STATUS_DEV_IN_PROGRESS,
         DAOJIRAIssues::STATUS_DEV_DONE,
         DAOJIRAIssues::STATUS_QA_DONE,
-        DAOJIRAIssues::STATUS_READY_TO_DEPLOY
+        DAOJIRAIssues::STATUS_READY_TO_DEPLOY,
+    );
+
+    $selectedProjects = array (
+        DAOJIRAIssues::PROJECT_MOBILITY,
+        DAOJIRAIssues::PROJECT_MARKET,
+    );
+
+    $selectedTeams = array (
+        AppService::TEAM_MM_Empark_DEV,
+        AppService::TEAM_MM_Empark_QA,
+        AppService::TEAM_MM_Premium_DEV,
+        AppService::TEAM_MM_Premium_QA,
     );
 
     $epicIssues = array();
@@ -26,19 +38,21 @@
 
     echo "Start: ".date("Y-m-d H:i:s")."<br>";
 
-    $JIRAService->deleteAllPersistedIssues();
-
     $issues = $JIRAService->getIssuesByStatuses($selectedStatuses);
     $JIRAService->persistIssues($issues);
 
     $issuesHistory = $JIRAService->getIssuesHistories($issues, array(DAOJIRAIssues::TYPE_EPIC));
     $JIRAService->persistIssuesHistories($issuesHistory);
 
-    $PMProjects = $appService->getProjectsByTeamKey(AppService::TEAM_MARKETBILITY_KEY,false);
-    foreach ($PMProjects as $PMProject)
+    $projectsVersions = $JIRAService->getProjectsVersions($selectedProjects);
+    $JIRAService->persistVersions($projectsVersions);
+
+
+    $PMProjectNames = $appService->getProjectNamesByTeamKeys($selectedTeams,null);
+    foreach ($PMProjectNames as $PMProjectName)
     {
-        $workingDayHours = $appService->getProjectTeamAllocatedTime($PMProject->getName());
-        $JIRAService->updatePMProjectsEstimatedDates($PMProject,$workingDayHours->getTeamAllocatedHoursPerDay());
+        $workingDayHours = $appService->getProjectTeamAllocatedTime($PMProjectName->getName());
+        $JIRAService->updatePMProjectsEstimatedDates($PMProjectName,$workingDayHours->getTeamAllocatedHoursPerDay());
     }
 
     echo "End: ".date("Y-m-d H:i:s")."<br>";
