@@ -480,11 +480,11 @@ class JIRAService
         $params = array (
             'notifyUsers'=>false,
             'fields'=>array(
-                "customfield_10927" => null,
-                "customfield_10928" => null,
+                "customfield_10927" => !is_null($start)?$start->format("Y-m-d\TH:i:s.0TZ"):null,
+                "customfield_10928" => !is_null($end)?$end->format("Y-m-d\TH:i:s.0TZ"):null,
             )
         );
-        $result = $this->api->editIssue($issueKey,$params);
+        $this->api->editIssue($issueKey,$params);
         $this->daoJIRAIssues->updateJIRAIssueDateEstimates($issueKey,$estimatedStartDate,$estimatedEndDate);
     }
 }
@@ -619,8 +619,6 @@ class JIRAIssue
         $this->epicLink = (array_key_exists('Epic Link',$fields)?$fields['Epic Link']:null);
         $this->epicColour = (array_key_exists('Epic Colour',$fields)?$fields['Epic Colour']:null);
 
-        $estimatedStartDate = new DateTime($fields['Estimated Start Date'], new DateTimeZone(INSTANCE_TIMEZONE));
-        $estimatedEndDate = new DateTime($fields['Estimated End Date'], new DateTimeZone(INSTANCE_TIMEZONE));
         $this->priorityDetail = (!is_null($fields['Priority Detail'])?$fields['Priority Detail']:$priority['id']);
         $this->releaseSummary = $fields['Release Summary (ES)'];
         $this->shortSummary = $fields['Short Summary (ES)'];
@@ -628,8 +626,8 @@ class JIRAIssue
         $this->EmpCustomer = $fields['EMP Customer']['value'];
         $this->PMProjectManager = $fields['PM Project Manager']['value'];
         $this->requestDate = $fields['Request Date'];
-        $this->estimatedStartDate = $estimatedStartDate->format("Y-m-d H:i:s");
-        $this->estimatedEndDate = $estimatedEndDate->format("Y-m-d H:i:s");
+        $this->estimatedStartDate = null;
+        $this->estimatedEndDate = null;
         $this->PMProjectName = $fields['PM Project Name']['value'];
     }
 

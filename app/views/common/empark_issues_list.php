@@ -25,9 +25,13 @@
                 <tbody>
                 <?php foreach ($issues as $issue) {
                     /**@var $issue JIRAIssueTblTupleExtended */
-                    $estimatedEndDate = new DateTime($issue->getEstimatedEndDate());
+                    if (!is_null($issue->getEstimatedEndDate())) {
+                        $estimatedEndDate = new DateTime($issue->getEstimatedEndDate());
+                    }
+                    else {
+                        $estimatedEndDate = null;
+                    }
                     ?>
-
                     <tr>
                         <td>
                             <input type="hidden" id="oldPriorityDetail[<?php echo $issue->getIssueKey();?>]" name="oldPriorityDetail[<?php echo $issue->getIssueKey();?>]"
@@ -47,7 +51,7 @@
                         <td><?php echo $issue->getEMPCustomer();?></td>
                         <td><?php echo $issue->getRequestDate();?></td>
                         <td><?php echo $issue->getDueDate();?></td>
-                        <td><?php echo $estimatedEndDate->format("Y-m-d");?></td>
+                        <td><?php echo !is_null($estimatedEndDate)?$estimatedEndDate->format("Y-m-d"):null;?></td>
                         <td><!-- dependencias --></td>
                         <td><?php echo $issue->getReleaseDate();?></td>
                     </tr>
