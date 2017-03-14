@@ -37,7 +37,7 @@
     $issuesTimeSpent = array();
 
     echo "Start: ".date("Y-m-d H:i:s")."<br>";
-/*
+
     $issues = $JIRAService->getIssuesByStatuses($selectedStatuses);
     $JIRAService->persistIssues($issues);
 
@@ -47,7 +47,6 @@
     $projectsVersions = $JIRAService->getProjectsVersions($selectedProjects);
     $JIRAService->persistVersions($projectsVersions);
 
-*/
     $PMProjectNames = $appService->getProjectNamesByTeamKeys($selectedTeams,null);
     foreach ($PMProjectNames as $PMProjectName)
     {
