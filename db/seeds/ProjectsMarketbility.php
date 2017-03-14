@@ -25,7 +25,7 @@ class ProjectsMarketbility extends AbstractSeed
                 'name'=>'MOB-EMP-DEV',
                 'team_key'=>'MM_EMP_DEV',
                 'jira_project_key'=>DAOJIRAIssues::PROJECT_MOBILITY,
-                'team_allocated_percentage'=>40,
+                'team_allocated_percentage'=>50,
                 'hidden'=>0,
             ),
             array(
@@ -39,7 +39,7 @@ class ProjectsMarketbility extends AbstractSeed
                 'name'=>'APK-EMP-DEV',
                 'team_key'=>'MM_EMP_DEV',
                 'jira_project_key'=>DAOJIRAIssues::PROJECT_MARKET,
-                'team_allocated_percentage'=>40,
+                'team_allocated_percentage'=>30,
                 'hidden'=>0,
             ),
             array(

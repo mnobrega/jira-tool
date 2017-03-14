@@ -386,7 +386,7 @@ class JIRAService
                 $currentStart = new DateTime($end);
                 $currentStart->modify("+1 second");
             } else {
-                $this->editIssueDateEstimates($issue->getIssueKey(),$now->format("Y-m-d H:i:s"),$now->format("Y-m-d H:i:s"));
+                $this->editIssueDateEstimates($issue->getIssueKey(),null,null);
             }
         }
 
@@ -474,17 +474,17 @@ class JIRAService
     }
     public function editIssueDateEstimates($issueKey, $estimatedStartDate, $estimatedEndDate)
     {
-        $start = new DateTime($estimatedStartDate, new DateTimeZone(INSTANCE_TIMEZONE));
-        $end = new DateTime($estimatedEndDate,new DateTimeZone(INSTANCE_TIMEZONE));
+        $start = !is_null($estimatedStartDate)?(new DateTime($estimatedStartDate, new DateTimeZone(INSTANCE_TIMEZONE))):null;
+        $end = !is_null($estimatedEndDate)?(new DateTime($estimatedEndDate,new DateTimeZone(INSTANCE_TIMEZONE))):null;
 
         $params = array (
             'notifyUsers'=>false,
             'fields'=>array(
-                "customfield_10927" => $start->format("Y-m-d\TH:i:s.0TZ"),
-                "customfield_10928" => $end->format("Y-m-d\TH:i:s.0TZ"),
+                "customfield_10927" => null,
+                "customfield_10928" => null,
             )
         );
-        $this->api->editIssue($issueKey,$params);
+        $result = $this->api->editIssue($issueKey,$params);
         $this->daoJIRAIssues->updateJIRAIssueDateEstimates($issueKey,$estimatedStartDate,$estimatedEndDate);
     }
 }

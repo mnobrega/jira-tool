@@ -1,16 +1,3 @@
-<?php
-    require_once(DIR_SERVICES."jira_service.php");
-    $JIRAService = new JIRAService();
-
-    if (count($_POST)) {
-        foreach ($_POST["newPriorityDetail"] as $key=>$value) {
-            if ($_POST["oldPriorityDetail"][$key]!==$value) {
-                $JIRAService->editIssuePriorityDetail($key,$value);
-            }
-        }
-        header('Location:'.$_SERVER['PHP_SELF']);
-    }
-?>
 <div class="panel">
     <div class="panel-body">
         <form id="issuesForm" method="post" action="">
