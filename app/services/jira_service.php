@@ -620,7 +620,7 @@ class JIRAIssue
         $this->epicColour = (array_key_exists('Epic Colour',$fields)?$fields['Epic Colour']:null);
 
         $this->priorityDetail = (!is_null($fields['Priority Detail'])?$fields['Priority Detail']:$priority['id']);
-        $this->releaseSummary = $fields['Release Summary (ES)'];
+        $this->releaseSummary = $fields['Release Summary'];
         $this->shortSummary = $fields['Short Summary (ES)'];
         $this->EmpITRequestor = $fields['EMP IT Requestor']['value'];
         $this->EmpCustomer = $fields['EMP Customer']['value'];
