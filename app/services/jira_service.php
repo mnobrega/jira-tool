@@ -472,6 +472,18 @@ class JIRAService
         $this->api->editIssue($issueKey,$params);
         $this->daoJIRAIssues->updateJIRAIssuePriorityDetail($issueKey,$priorityDetail);
     }
+    public function editIssuePriority($issueKey, $priority)
+    {
+        $params = array (
+            'notifyUsers'=>false,
+            'fields'=>array(
+                "priority" => floatval($priority)
+            )
+        );
+        $result = $this->api->editIssue($issueKey,$params);
+        debug($result,TRUE);
+        $this->daoJIRAIssues->updateJIRAIssuePriority($issueKey,$priority);
+    }
     public function editIssueDateEstimates($issueKey, $estimatedStartDate, $estimatedEndDate)
     {
         $start = !is_null($estimatedStartDate)?(new DateTime($estimatedStartDate, new DateTimeZone(INSTANCE_TIMEZONE))):null;

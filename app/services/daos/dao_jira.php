@@ -126,7 +126,7 @@ class DAOJIRAIssues extends PDOSingleton
         $this->query($query);
     }
     private function updateJIRAIssue($issueKey, $priorityDetail=null, $originalEstimate=null,
-                                     $estimatedStartDate=null, $estimatedEndDate=null)
+                                     $estimatedStartDate=null, $estimatedEndDate=null, $priority=null)
     {
         $query = "UPDATE ".self::TABLENAME_JIRA_ISSUES." SET
                         issue_key = issue_key
@@ -134,20 +134,25 @@ class DAOJIRAIssues extends PDOSingleton
                         ".(!is_null($originalEstimate)?" ,original_estimate='".$originalEstimate."'":"")."
                         ".(!is_null($estimatedStartDate)?" ,estimated_start_date='".$estimatedStartDate."'":"")."
                         ".(!is_null($estimatedEndDate)?" ,estimated_end_date='".$estimatedEndDate."'":"")."
+                        ".(!is_null($priority)?" ,priority='".$priority."'":"")."
                     WHERE issue_key='".$issueKey."';";
         $this->query($query);
     }
     public function updateJIRAIssuePriorityDetail($issueKey, $priorityDetail)
     {
-        $this->updateJIRAIssue($issueKey,$priorityDetail,null);
+        $this->updateJIRAIssue($issueKey,$priorityDetail,null,null,null,null);
+    }
+    public function updateJIRAIssuePriority($issueKey, $priority)
+    {
+        $this->updateJIRAIssue($issueKey,null,null,null,null,$priority);
     }
     public function updateJIRAIssueOriginalEstimate($issueKey, $originalEstimate)
     {
-        $this->updateJIRAIssue($issueKey,null,$originalEstimate);
+        $this->updateJIRAIssue($issueKey,null,$originalEstimate,null,null,null);
     }
     public function updateJIRAIssueDateEstimates($issueKey, $PMEstimatedStartDate, $PMEstimatedEndDate)
     {
-        $this->updateJIRAIssue($issueKey,null,null,$PMEstimatedStartDate, $PMEstimatedEndDate);
+        $this->updateJIRAIssue($issueKey,null,null,$PMEstimatedStartDate, $PMEstimatedEndDate,null);
     }
     public function deleteAllJIRAIssues()
     {

@@ -1,3 +1,23 @@
+<?php
+require_once(DIR_SERVICES."jira_service.php");
+$JIRAService = new JIRAService();
+var_dump($_POST);
+if (count($_POST)) {
+    var_dump($_POST);
+    die();
+    foreach ($_POST["newPriorityDetail"] as $key=>$value) {
+        if ($_POST["oldPriorityDetail"][$key]!==$value) {
+            $JIRAService->editIssuePriorityDetail($key,$value);
+        }
+    }
+    foreach ($_POST["newPriority"] as $key=>$value) {
+        if ($_POST["oldPriority"][$key]!==$value) {
+            $JIRAService->editIssuePriority($key, $value);
+        }
+    }
+    //header('Location:'.$_SERVER['PHP_SELF']);
+}
+?>
 <div class="panel">
     <div class="panel-body">
         <form id="issuesForm" method="post" action="">
@@ -5,7 +25,7 @@
                 <thead>
                 <tr>
                     <th class="col-sm-1">Prio. Det.</th>
-                    <th>Prio.</th>
+                    <th class="col-sm-1">Prio.</th>
                     <th>Status</th>
                     <th>JIRA Issue</th>
                     <th>Proyecto</th>
@@ -39,7 +59,12 @@
                             <input id="newPriorityDetail[<?php echo $issue->getIssueKey();?>]" name="newPriorityDetail[<?php echo $issue->getIssueKey();?>]"
                                    type="text" value="<?php echo $issue->getPriorityDetail();?>" class="form-control-priority" />
                         </td>
-                        <td><?php echo $issue->getPriority();?></td>
+                        <td>
+                            <input type="hidden" id="oldPriority[<?php echo $issue->getIssueKey();?>]" name="oldPriority[<?php echo $issue->getIssueKey();?>]"
+                                   value="<?php echo $issue->getPriority();?>" />
+                            <input id="newPriority[<?php echo $issue->getIssueKey();?>]" name="newPriority[<?php echo $issue->getIssueKey();?>]"
+                                   type="text" value="<?php echo $issue->getPriority();?>" class="form-control-priority" />
+                        </td>
                         <td><?php echo $issue->getIssueStatus();?></td>
                         <td><a href="http://market.kujira.premium-minds.com/browse/<?php echo $issue->getIssueKey();?>" target="_blank"><?php echo $issue->getIssueKey();?></a></td>
                         <td><?php echo $issue->getShortSummary();?></td>
@@ -101,7 +126,18 @@
                         }
                     }
                 }, //priority detail
-                {"width":"3%"}, //priority
+                {
+                    "width":"3%",
+                    "orderDataType":"dom-text-numeric",
+                    render: function(data, type, row) {
+                        if (type === 'export') {
+                            var priorityDetail = $(data).find('input[type="text"]').addBack();
+                            return priorityDetail.val();
+                        } else {
+                            return data;
+                        }
+                    }
+                }, //priority
                 {"width":"4%"}, // status
                 {"width":"3%"}, // JIRA Issue
                 {"width":"10%"}, // Summary
