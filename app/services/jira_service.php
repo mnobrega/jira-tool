@@ -41,6 +41,14 @@ class JIRAService
         "ghx-label-9" => "#f15c75"
     );
 
+    static $priorityNames = array (
+        "1" => "Highest",
+        "2" => "High",
+        "3" => "Medium",
+        "4" => "Low",
+        "5" => "Lowest",
+    );
+
     private $api;
     private $walker;
 
@@ -477,11 +485,13 @@ class JIRAService
         $params = array (
             'notifyUsers'=>false,
             'fields'=>array(
-                "priority" => floatval($priority)
+                "priority" => array(
+                    "id"=>$priority,
+                    "name"=>self::$priorityNames[$priority]
+                )
             )
         );
-        $result = $this->api->editIssue($issueKey,$params);
-        debug($result,TRUE);
+        $this->api->editIssue($issueKey,$params);
         $this->daoJIRAIssues->updateJIRAIssuePriority($issueKey,$priority);
     }
     public function editIssueDateEstimates($issueKey, $estimatedStartDate, $estimatedEndDate)
