@@ -16,11 +16,6 @@ class PersonsMarketbility extends AbstractSeed
     {
         $data = array (
             array(
-                'username'=>'mnobrega',
-                'full_name'=>'Márcio Nóbrega',
-                'jira_username'=>'mnobrega',
-            ),
-            array(
                 'username'=>'asoares',
                 'full_name'=>'André Soares',
                 'jira_username'=>'aoares',
@@ -34,6 +29,11 @@ class PersonsMarketbility extends AbstractSeed
                 'username'=>'lgoncalves',
                 'full_name'=>'Luís Gonçalves',
                 'jira_username'=>'lgoncalves',
+            ),
+            array(
+                'username'=>'roliveira',
+                'full_name'=>'Ruben Oliveira',
+                'jira_username'=>'roliveira'
             ),
             array(
                 'username'=>'sottaviani',

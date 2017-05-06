@@ -19,6 +19,7 @@
         AppService::TEAM_MM_Empark_QA,
         AppService::TEAM_MM_Premium_DEV,
         AppService::TEAM_MM_Premium_QA,
+        AppService::TEAM_MM_Empark_DEV_FR,
     );
 
     $selectedProjects = array (

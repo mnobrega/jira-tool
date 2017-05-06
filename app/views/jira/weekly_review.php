@@ -32,7 +32,7 @@
                             <a href="<?php echo JIRA_URL."/browse/".$issue->getIssueKey();?>" target="_blank"><?php echo $issue->getIssueKey();?></a>
                         </div>
                         <div class="col-md-8">
-                            <?php echo $issue->getSummary();?>
+                            <?php echo $issue->getReleaseSummary();?>
                         </div>
                     </div>
                 <?php } else { ?>
@@ -47,7 +47,7 @@
                             <a href="<?php echo JIRA_URL."/browse/".$issue->getIssueKey();?>" target="_blank"><?php echo $issue->getIssueKey();?></a>
                         </div>
                         <div class="col-md-8">
-                            <?php echo $issue->getSummary();?>
+                            <?php echo $issue->getReleaseSummary();?>
                         </div>
                     </div>
                 <?php } else { ?>
@@ -62,7 +62,7 @@
                             <a href="<?php echo JIRA_URL."/browse/".$issue->getIssueKey();?>" target="_blank"><?php echo $issue->getIssueKey();?></a>
                         </div>
                         <div class="col-md-8">
-                            <?php echo $issue->getSummary();?>
+                            <?php echo $issue->getReleaseSummary();?>
                         </div>
                     </div>
                 <?php } else { ?>

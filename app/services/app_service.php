@@ -12,6 +12,7 @@ class AppService
     const TEAM_MM_Premium_DEV = "MM_PM_DEV";
     const TEAM_MM_Premium_QA = "MM_PM_QA";
     const TEAM_MM_Empark_PMA = "MM_EMP_PMA";
+    const TEAM_MM_Empark_DEV_FR = "MM_EMP_DEV_FR";
 
     private $daoApp;
 

@@ -20,12 +20,12 @@ class TeamsMarketbility extends AbstractSeed
                 'name'=>'Marketbility Empark Dev',
             ),
             array(
-                'key'=>'MM_EMP_QA',
-                'name'=>'Marketbility Empark QA',
+                'key'=>'MM_EMP_DEV_FR',
+                'name'=>'Marketbility Empark Dev France',
             ),
             array(
-                'key'=>'MM_EMP_PMA',
-                'name'=>'Marketbility Empark Product Management',
+                'key'=>'MM_EMP_QA',
+                'name'=>'Marketbility Empark QA',
             ),
             array(
                 'key'=>'MM_PM_DEV',
@@ -38,16 +38,7 @@ class TeamsMarketbility extends AbstractSeed
         );
 
         $teamsPersonsData = array(
-            array(
-                'team_key'=>'MM_EMP_PMA',
-                'person_username'=>'mnobrega',
-                'person_allocated_hours_per_day'=>7,
-            ),
-            array(
-                'team_key'=>'MM_EMP_DEV',
-                'person_username'=>'mnobrega',
-                'person_allocated_hours_per_day'=>1,
-            ),
+            // EMPARK
             array(
                 'team_key'=>'MM_EMP_DEV',
                 'person_username'=>'asoares',
@@ -59,24 +50,31 @@ class TeamsMarketbility extends AbstractSeed
                 'person_allocated_hours_per_day'=>8,
             ),
             array(
-                'team_key'=>'MM_EMP_QA',
-                'person_username'=>'sottaviani',
-                'person_allocated_hours_per_day'=>4,
-            ),
-            array(
-                'team_key'=>'MM_EMP_QA',
-                'person_username'=>'mmatos',
-                'person_allocated_hours_per_day'=>4
-            ),
-            array(
-                'team_key'=>'MM_PM_DEV',
+                'team_key'=>'MM_EMP_DEV_FR',
                 'person_username'=>'lgoncalves',
                 'person_allocated_hours_per_day'=>8,
             ),
             array(
+                'team_key'=>'MM_EMP_QA',
+                'person_username'=>'sottaviani',
+                'person_allocated_hours_per_day'=>8,
+            ),
+            array(
+                'team_key'=>'MM_EMP_QA',
+                'person_username'=>'mmatos',
+                'person_allocated_hours_per_day'=>8
+            ),
+
+            // PREMIUM
+            array(
+                'team_key'=>'MM_PM_DEV',
+                'person_username'=>'roliveira',
+                'person_allocated_hours_per_day'=>6,
+            ),
+            array(
                 'team_key'=>'MM_PM_QA',
                 'person_username'=>'tcarreira',
-                'person_allocated_hours_per_day'=>4
+                'person_allocated_hours_per_day'=>8
             )
         );
 

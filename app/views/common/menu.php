@@ -12,6 +12,7 @@
         <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
             <ul class="nav navbar-nav">
                 <li><a href="/jira/weekly_review/index.php">Weekly Review</a></li>
+                <!--
                 <li><a href="/jira/team_roadmap/index.php">Roadmap</a>
                 <li class="dropdown">
                     <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Issues<span class="caret"></span></a>
@@ -20,10 +21,11 @@
                         <li><a href="/jira/medium_term_issues/index.php">Medium Term</a></li>
                     </ul>
                 </li>
+                -->
                 <li class="dropdown">
                     <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Empark Reporting<span class="caret"></span></a>
                     <ul class="dropdown-menu">
-                        <li><a href="/jira/empark_weekly_review/index.php">Weekly Review</a>
+                        <!--<li><a href="/jira/empark_weekly_review/index.php">Weekly Review</a>-->
                         <li><a href="/jira/empark_proyectos/index.php">Proyectos</a></li>
                         <li><a href="/jira/empark_tareas_mantenimiento/index.php">Tareas y Mantenimiento</a></li>
                         <li><a href="/jira/empark_roadmap/index.php">Roadmap</a>
