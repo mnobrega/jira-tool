@@ -34,7 +34,7 @@ class DAOApp extends PDOSingleton
      * @param $projectName
      * @return ProjectTeamAllocatedTime[]
      */
-    public function getProjectTeamAllocatedTime($projectName)
+    public function getProjectsTeamAllocatedTime(Array $projectNames)
     {
         $query ="SELECT x.project_name, SUM(team_allocated_hours_per_day) AS team_allocated_hours_per_day FROM (
                         SELECT p.name AS project_name,
@@ -42,10 +42,21 @@ class DAOApp extends PDOSingleton
                         FROM ".self::TABLENAME_APP_PROJECTS." p
                             JOIN ".self::TABLENAME_APP_TEAMS." t ON t.key = p.team_key
                             JOIN ".self::TABLENAME_APP_TEAMS_PERSONS." tp ON tp.team_key = t.key
-                        WHERE p.name='".$projectName."'
+                        WHERE p.name IN ".$this->inArray($projectNames)."
                         GROUP BY p.name, p.team_allocated_percentage) x
                     GROUP BY x.project_name;";
-        return $this->getObj($this->query($query),"ProjectTeamAllocatedTime",false);
+        return $this->getObjArray($this->query($query),"ProjectTeamAllocatedTime");
+    }
+
+    /**
+     * @return Project []
+     */
+    public function getProjects()
+    {
+        $query = "SELECT *
+                    FROM ".self::TABLENAME_APP_PROJECTS." p
+                    ORDER BY p.name ASC;";
+        return $this->getObjArray($this->query($query),"Project");
     }
 }
 

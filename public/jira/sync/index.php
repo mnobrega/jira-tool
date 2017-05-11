@@ -50,8 +50,9 @@
     $PMProjectNames = $appService->getProjectNamesByTeamKeys($selectedTeams,null);
     foreach ($PMProjectNames as $PMProjectName)
     {
+        debug($PMProjectName);
         $workingDayHours = $appService->getProjectTeamAllocatedTime($PMProjectName->getName());
-        $JIRAService->updatePMProjectsEstimatedDates($PMProjectName,$workingDayHours->getTeamAllocatedHoursPerDay());
+        //$JIRAService->updatePMProjectsEstimatedDates($PMProjectName,$workingDayHours->getTeamAllocatedHoursPerDay());
     }
 
     echo "End: ".date("Y-m-d H:i:s")."<br>";

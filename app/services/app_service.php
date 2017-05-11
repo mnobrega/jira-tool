@@ -37,6 +37,31 @@ class AppService
      */
     public function getProjectTeamAllocatedTime($projectName)
     {
-        return $this->daoApp->getProjectTeamAllocatedTime($projectName);
+        return $this->daoApp->getProjectsTeamAllocatedTime(array($projectName));
+    }
+
+    public function getProjectsTeamAllocatedTime(Array $projectNames)
+    {
+        return $this->daoApp->getProjectsTeamAllocatedTime($projectNames);
+    }
+
+    /**
+     * @return Project[]
+     */
+    public function getProjects()
+    {
+        return $this->daoApp->getProjects();
+    }
+
+    /**
+     * @param Project[] $projects
+     */
+    public function getProjectNames(Array $projects)
+    {
+        $projectNames = array();
+        foreach ($projects as $project) {
+            $projectNames[] = $project->getName();
+        }
+        return $projectNames;
     }
 }
