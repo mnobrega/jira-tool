@@ -1,17 +1,6 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
-$scriptRunOneTime = <<SCRIPT
-	echo "Dependencies Install"
-	cd /home/vagrant/jira-tool
-	composer install
-	
-	echo "DB Migrations"
-	mysql -u homestead -psecret -e "CREATE DATABASE jira_tools;"
-	/home/vagrant/jira-tool/vendor/bin/phinx migrate
-	/home/vagrant/jira-tool/vendor/bin/phinx seed:run
-SCRIPT
-
 # All Vagrant configuration is done below. The "2" in Vagrant.configure
 # configures the configuration version (we support older styles for
 # backwards compatibility). Please don't change it unless you know what
@@ -34,12 +23,12 @@ Vagrant.configure("2") do |config|
   # within the machine from a port on the host machine. In the example below,
   # accessing "localhost:8080" will access port 80 on the guest machine.
   # NOTE: This will enable public access to the opened port
-  # config.vm.network "forwarded_port", guest: 80, host: 8082
+  # config.vm.network "forwarded_port", guest: 80, host: 8080
 
   # Create a forwarded port mapping which allows access to a specific port
   # within the machine from a port on the host machine and only allow access
   # via 127.0.0.1 to disable public access
-  config.vm.network "forwarded_port", guest: 80, host: 8083, host_ip: "127.0.0.1"
+  config.vm.network "forwarded_port", guest: 80, host: 8080, host_ip: "127.0.0.2"
 
   # Create a private network, which allows host-only access to the machine
   # using a specific IP.
@@ -54,7 +43,7 @@ Vagrant.configure("2") do |config|
   # the path on the host to the actual folder. The second argument is
   # the path on the guest to mount the folder. And the optional third
   # argument is a set of non-required options.
-  config.vm.synced_folder "../jira-tool", "/home/vagrant/jira-tool"
+  config.vm.synced_folder "../jira-tool", "/home/vagrant/code/jira-tool"
 
   # Provider-specific configuration so you can fine-tune various
   # backing providers for Vagrant. These expose provider-specific options.
@@ -82,5 +71,9 @@ Vagrant.configure("2") do |config|
   # Enable provisioning with a shell script. Additional provisioners such as
   # Puppet, Chef, Ansible, Salt, and Docker are also available. Please see the
   # documentation for more information about their specific syntax and use.
-  config.vm.provision "shell", privileged:false, run: 'always', inline: $scriptRunOneTime
+  config.vm.provision "shell", privileged:false, run: 'once', path: ".provision/bootstrap.sh"
+  #config.vm.provision "shell", privileged:false, run: 'once', path: ".provision/bootstrap_jiratool.sh"
+  config.vm.provision "shell", privileged:false, run: 'always', inline: <<-SHELL
+	sudo install-keymap pt
+  SHELL
 end
