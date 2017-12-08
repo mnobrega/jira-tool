@@ -9,9 +9,9 @@ define('DB_USER','homestead');
 define('DB_PASS','secret');
 define('DB_NAME','jira_tools');
 
-define('JIRA_URL','http://market.kujira.premium-minds.com');
-define('JIRA_USERNAME','mnobrega');
-define('JIRA_PASSWORD','Madeira.24404');
+define('JIRA_URL','url');
+define('JIRA_USERNAME','user');
+define('JIRA_PASSWORD','password');
 
 define('INSTANCE_TIMEZONE','Europe/Lisbon');
 
